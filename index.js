@@ -69,7 +69,6 @@ for (const file of inputFiles) {
 				`There's no game going on in this channel right now! Wait for a referee to start one.`
 			);
 		}
-		console.log(game);
 		const a = message.content.split(` `);
 		if (names.reduce((acc, cv) => acc || a[0] == `${prefix}${cv}`, false)) {
 			execute(message, game, ...a.slice(1));

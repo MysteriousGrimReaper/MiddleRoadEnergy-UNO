@@ -38,16 +38,18 @@ module.exports = {
 				current_turn: 0,
 			},
 			deck: shuffleArray(base),
-			player1: {
-				id: first_player.id,
-				hand: [],
-				pp: no_pp ? 0 : 1,
-			},
-			player2: {
-				id: second_player.id,
-				hand: [],
-				pp: no_pp ? 0 : 1,
-			},
+			players: [
+				{
+					id: first_player.id,
+					hand: [],
+					pp: no_pp ? 0 : 1,
+				},
+				{
+					id: second_player.id,
+					hand: [],
+					pp: no_pp ? 0 : 1,
+				},
+			],
 		};
 		await games.set(`${channel.id}`, game);
 		await message.reply(
@@ -55,6 +57,5 @@ module.exports = {
 				no_pp ? ` Both players start with 0 PP.` : ``
 			}`
 		);
-		console.log(await games.all());
 	},
 };

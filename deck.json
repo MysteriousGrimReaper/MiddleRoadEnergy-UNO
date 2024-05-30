@@ -100,13 +100,13 @@
 		{ "color": "Y", "icon": "REVERSE" },
 		{ "color": "Y", "icon": "SKIP" },
 		{ "color": "Y", "icon": "+2" },
-		{ "color": "W", "icon": "" },
-		{ "color": "W", "icon": "" },
-		{ "color": "W", "icon": "" },
-		{ "color": "W", "icon": "" },
-		{ "color": "W", "icon": "+4" },
-		{ "color": "W", "icon": "+4" },
-		{ "color": "W", "icon": "+4" },
-		{ "color": "W", "icon": "+4" }
+		{ "color": "WILD", "icon": "" },
+		{ "color": "WILD", "icon": "" },
+		{ "color": "WILD", "icon": "" },
+		{ "color": "WILD", "icon": "" },
+		{ "color": "WILD", "icon": "+4" },
+		{ "color": "WILD", "icon": "+4" },
+		{ "color": "WILD", "icon": "+4" },
+		{ "color": "WILD", "icon": "+4" }
 	]
 }

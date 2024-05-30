@@ -1,10 +1,29 @@
 const { QuickDB } = require("quick.db");
-const { EmbedBuilder } = require("discord.js");
+const {
+	EmbedBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ActionRowBuilder,
+} = require("discord.js");
 const { embed_colors, display_names } = require("../enums.json");
 const db = new QuickDB();
 const games = db.table("games");
 const fs = require("node:fs");
 const path = require("node:path");
+const hand_button = new ButtonBuilder()
+	.setCustomId(`hand`)
+	.setStyle(ButtonStyle.Primary)
+	.setLabel(`Hand`)
+	.setEmoji(`🎴`);
+const table_button = new ButtonBuilder()
+	.setCustomId(`table`)
+	.setStyle(ButtonStyle.Secondary)
+	.setLabel(`Table`)
+	.setEmoji(`🎨`);
+const button_row = new ActionRowBuilder().setComponents([
+	hand_button,
+	table_button,
+]);
 module.exports = {
 	name: `start`,
 	aliases: [`s`],
@@ -18,38 +37,39 @@ module.exports = {
 				`A match has not been initialized in this channel yet! Use \`ref init <@first_player> <@second_player>\` to initialize a match.`
 			);
 		}
-		if (await games.get(`${channel.id}.on`)) {
+		if (game.on) {
 			return await channel.send(
 				`There's a game going on in this channel already!`
 			);
 		}
 		const starting_cards = game.cards;
-		const player1 = `<@${game.player1.id}>`;
+		game.on = true;
+		const player1 = `<@${game.players[0].id}>`;
 		game.table.cards.push(game.deck.pop());
 		for (let i = 0; i < starting_cards; i++) {
-			game.player1.hand.push(game.deck.pop());
-			game.player2.hand.push(game.deck.pop());
+			game.players[0].hand.push(game.deck.pop());
+			game.players[1].hand.push(game.deck.pop());
 		}
-		await games.set(`${channel.id}.player1.hand`, game.player1.hand);
-		await games.set(`${channel.id}.player2.hand`, game.player2.hand);
-		await games.set(`${channel.id}.table`, game.table);
-		await games.set(`${channel.id}.deck`, game.deck);
-		await games.set(`${channel.id}.on`, true);
+		await games.set(`${channel.id}`, game);
 		const top_card = game.table.cards[0];
+		console.log();
 		const play_embed = new EmbedBuilder()
 			.setDescription(
-				`Starting UNO game with ${starting_cards} cards! The currently flipped card is: **${
+				`Starting UNO game with ${starting_cards} cards! The currently flipped card is:\n**${
 					display_names[top_card.color]
-				} ${top_card.icon}**`
+				} ${top_card.icon}**.\n\nIt is now ${player1}'s turn!`
 			)
-			.setColor(parseInt(embed_colors[top_card.color], 16));
+			.setColor(parseInt(embed_colors[top_card.color], 16))
+			.setThumbnail(
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${top_card.color}${top_card.icon}.png`
+			)
+			.setFooter({
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
+			});
 		await channel.send({
 			embeds: [play_embed],
-			files: [
-				`./cards/${top_card.color == `W` ? `WILD` : top_card.color}${
-					top_card.icon
-				}.png`,
-			],
+			components: [button_row],
 		});
 	},
 };
