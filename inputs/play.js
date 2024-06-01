@@ -1,5 +1,6 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
+const { base } = require("../deck.json");
 const {
 	EmbedBuilder,
 	ButtonBuilder,
@@ -26,9 +27,8 @@ module.exports = {
 	name: `play`,
 	aliases: [`p`],
 	async execute(message, game) {
-		const { author, channel } = message;
+		const { author, channel, client } = message;
 		const { on, table, deck, players } = game;
-
 		const { current_turn, cards } = table;
 		if (game.processing) {
 			return;
@@ -45,6 +45,11 @@ module.exports = {
 		) {
 			return await message.reply(`It's not your turn yet!`);
 		}
+		const users = [];
+		for (const p of players) {
+			users.push(await client.users.fetch(p.id));
+		}
+		console.log(users);
 		const parseColor = (color) => {
 			switch ((color || "").toLowerCase()) {
 				case "red":
@@ -109,6 +114,7 @@ module.exports = {
 				R: "REVERSE",
 				NOU: "REVERSE",
 				S: "SKIP",
+				"W +4": "WILD+4",
 			};
 			let _color = parseColor(color);
 			if (!_color) {
@@ -142,7 +148,6 @@ module.exports = {
 						await card_promise;
 						first = false;
 					}
-					await games.delete(`${channel.id}.processing`);
 				} else {
 					[color, icon] = [icon, color];
 					_color = parseColor(color);
@@ -155,6 +160,7 @@ module.exports = {
 					}
 				}
 			}
+			await games.delete(`${channel.id}.processing`);
 			color = _color;
 			console.log("Getting card:", color, icon);
 			if (alias[icon.toUpperCase()]) {
@@ -164,9 +170,15 @@ module.exports = {
 				message.author.id == players[0].id
 					? players[0].hand
 					: players[1].hand;
+			console.log("Searching for card " + icon);
 			if (["WILD", "WILD+4"].includes(icon.toUpperCase())) {
-				let card = hand.find((c) => c.icon === icon.toUpperCase());
+				let card = hand.find(
+					(c) =>
+						c.icon === icon.toUpperCase() ||
+						"WILD" + c.icon === icon.toUpperCase()
+				);
 				if (!card) {
+					console.log(`Not a card.`);
 					return undefined;
 				}
 				card.color = color;
@@ -184,36 +196,38 @@ module.exports = {
 		if (!card) {
 			return "It doesn't seem like you have that card! Try again.";
 		}
-		const top_card = table.cards[table.cards.length - 1];
+		let top_card = table.cards[table.cards.length - 1];
 		if (
 			!top_card.color ||
 			card.wild ||
+			top_card.color == `WILD` ||
 			card.icon === top_card.icon ||
 			card.color === top_card.color
 		) {
+			if (card.color != top_card.color) {
+				game.players[current_turn].stats.times_switched_color++;
+			}
 			game.table.cards.push(card);
 			game.players[current_turn].hand.splice(
 				game.players[current_turn].hand.indexOf(card),
 				1
 			);
-
+			game.players[current_turn].stats.cards_played++;
+			game.players[current_turn].uno = false;
 			if (game.players[current_turn].hand.length === 0) {
-				if (!game.finished) {
-					game.finished = [];
-				}
-				game.finished.push(game.players[current_turn]);
 				await channel.send(
 					`Good game! <@${game.players[current_turn].id}> has won!`
 				);
+				game.players[current_turn].wins++;
 				// reset
 				while (game.players[0].hand.length > 0) {
-					game.deck.cards.push(game.players[0].hand.pop());
+					game.deck.push(game.players[0].hand.pop());
 				}
 				while (game.players[1].hand.length > 0) {
-					game.deck.cards.push(game.players[1].hand.pop());
+					game.deck.push(game.players[1].hand.pop());
 				}
 				while (game.table.cards.length > 0) {
-					game.deck.cards.push(game.table.cards.pop());
+					game.deck.push(game.table.cards.pop());
 				}
 				function shuffleArray(array) {
 					for (let i = array.length - 1; i > 0; i--) {
@@ -222,9 +236,54 @@ module.exports = {
 					}
 					return array;
 				}
-				game.table.cards = shuffleArray(game.table.cards);
+				game.deck = shuffleArray(base);
 				game.on = false;
-				game.table.current_turn = 0;
+				game.matches_finished++;
+				if (game.matches_finished < Math.ceil(game.bestof / 2) / 2) {
+					game.table.current_turn = 0;
+				} else if (game.matches_finished < Math.ceil(game.bestof / 2)) {
+					game.table.current_turn = 1;
+				} else {
+					game.table.current_turn = game.matches_finished % 2;
+				}
+				const status =
+					game.players[0].wins > game.players[1].wins
+						? 1
+						: game.players[0].wins < game.players[1].wins
+						? -1
+						: 0;
+				const scoreboard = `${status >= 0 ? `**` : ``}${
+					users[0].globalName
+				} ${game.players[0].wins}${status > 0 ? `**` : ``} - ${
+					status < 0 ? `**` : ``
+				}${game.players[1].wins} ${users[1].globalName}${
+					status <= 0 ? `**` : ``
+				}`;
+				const stats_embed = new EmbedBuilder()
+					.setTitle(`Current Match Statistics`)
+					.setDescription(`${scoreboard}`)
+					.addFields(
+						{
+							name: `Cards Played`,
+							value: `${users[0].globalName} - ${game.players[0].stats.cards_played}\n${users[1].globalName} - ${game.players[1].stats.cards_played}`,
+						},
+						{
+							name: `WILD +4s Played`,
+							value: `${users[0].globalName} - ${game.players[0].stats.plus_4s_played}\n${users[1].globalName} - ${game.players[1].stats.plus_4s_played}`,
+						},
+						{
+							name: `Times Switched Color`,
+							value: `${users[0].globalName} - ${game.players[0].stats.times_switched_color}\n${users[1].globalName} - ${game.players[1].stats.times_switched_color}`,
+						},
+						{
+							name: `Cards Drawn`,
+							value: `${users[0].globalName} - ${game.players[0].stats.cards_drawn}\n${users[1].globalName} - ${game.players[1].stats.cards_drawn}`,
+						}
+					)
+					.setColor(parseInt(embed_colors[top_card.color], 16))
+					.setThumbnail(users[current_turn].avatarURL());
+				await channel.send({ embeds: [stats_embed] });
+				return await games.set(`${channel.id}`, game);
 			}
 
 			let extra = "";
@@ -255,7 +314,7 @@ module.exports = {
 					}
 					const draw_chunk = game.deck.splice(0, amount);
 					game.players[1 - current_turn].hand.push(...draw_chunk);
-
+					game.players[1 - current_turn].stats.cards_drawn += amount;
 					extra = `<@${
 						game.players[1 - current_turn].id
 					}> picks up ${amount} cards! Tough break. `;
@@ -270,8 +329,9 @@ module.exports = {
 						]
 					}**! `;
 					break;
-				case "WILD+4": {
+				case "+4": {
 					// let player = game.queue.shift();
+					game.players[current_turn].stats.plus_4s_played++;
 					const amount = 4;
 					if (game.deck.length < amount) {
 						await channel.send(`*Reshuffling the deck...*`);
@@ -282,11 +342,12 @@ module.exports = {
 					}
 					const draw_chunk = game.deck.splice(0, amount);
 					game.players[1 - current_turn].hand.push(...draw_chunk);
+					game.players[1 - current_turn].stats.cards_drawn += amount;
 					extra = `<@${
 						game.players[1 - current_turn].id
 					}> picks up 4! The current color is now **${
 						display_names[
-							game.table.cards[game.table.cards.length - 1]
+							game.table.cards[game.table.cards.length - 1].color
 						]
 					}**! `;
 					extra += " Also, skip a turn!";
@@ -298,10 +359,12 @@ module.exports = {
 			game.table.current_turn++;
 			game.table.current_turn %= 2;
 			console.log(game.table.current_turn);
-			const top_card = game.table.cards[game.table.cards.length - 1];
+			top_card = game.table.cards[game.table.cards.length - 1];
 			const play_embed = new EmbedBuilder()
 				.setDescription(
 					`A **${display_names[top_card.color]} ${
+						top_card.wild ? `WILD` : ``
+					}${
 						top_card.icon
 					}** has been played. ${extra}\n\nIt is now <@${
 						game.players[game.table.current_turn].id
@@ -309,7 +372,9 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${top_card.color}${top_card.icon}.png`
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+						top_card.color
+					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
 					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
@@ -319,7 +384,7 @@ module.exports = {
 				embeds: [play_embed],
 				components: [button_row],
 			});
-			if (game.powerplay) {
+			if (game.powerplay && current_turn != game.table.current_turn) {
 				const amount = 1;
 				if (game.deck.length < amount) {
 					await channel.send(`*Reshuffling the deck...*`);
@@ -330,11 +395,13 @@ module.exports = {
 				}
 				const draw_chunk = game.deck.splice(0, amount);
 				game.players[game.table.current_turn].hand.push(...draw_chunk);
+				game.players[game.table.current_turn].stats.cards_drawn +=
+					amount;
 				game.table.current_turn++;
 				game.table.current_turn %= 2;
-				const play_embed = new EmbedBuilder()
+				const pp_embed = new EmbedBuilder()
 					.setDescription(
-						`<@${
+						`**POWER PLAY!!** <@${
 							game.players[1 - current_turn].id
 						}> drew a card. ${extra}\n\nIt is now <@${
 							game.players[game.table.current_turn].id
@@ -342,14 +409,17 @@ module.exports = {
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(
-						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${top_card.color}${top_card.icon}.png`
+						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+							top_card.color
+						}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 					)
 					.setFooter({
 						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
 						text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 					});
-				return await channel.send({
-					embeds: [play_embed],
+				game.powerplay = undefined;
+				await channel.send({
+					embeds: [pp_embed],
 					components: [button_row],
 				});
 			}

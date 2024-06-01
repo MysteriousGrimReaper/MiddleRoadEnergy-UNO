@@ -69,11 +69,22 @@ for (const file of inputFiles) {
 				`There's no game going on in this channel right now! Wait for a referee to start one.`
 			);
 		}
-		const a = message.content.split(` `);
-		if (names.reduce((acc, cv) => acc || a[0] == `${prefix}${cv}`, false)) {
-			execute(message, game, ...a.slice(1));
-		} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
-			execute(message, game, ...a.slice(2));
+		const commands = message.content.split(`&&`);
+		for (c of commands) {
+			const a = c.split(` `);
+			if (
+				names.reduce(
+					(acc, cv) =>
+						acc ||
+						a[0] == `${prefix}${cv}` ||
+						(a[0] == cv && commands.indexOf(c) > 0),
+					false
+				)
+			) {
+				await execute(message, game, ...a.slice(1));
+			} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
+				await execute(message, game, ...a.slice(2));
+			}
 		}
 	});
 }

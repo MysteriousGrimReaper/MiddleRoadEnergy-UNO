@@ -17,9 +17,10 @@ module.exports = {
 		const channel = message?.mentions?.channels?.first() ?? message.channel;
 		const first_player = message?.mentions?.users?.at(0);
 		const second_player = message?.mentions?.users?.at(1);
+
 		if (await games.get(`${channel.id}`)) {
 			await message.reply(
-				`A game has already been set up in this channel! Use \`ref close\` to close it.`
+				`A match has already been set up in this channel! Use \`ref close\` to close it.`
 			);
 			return;
 		}
@@ -43,13 +44,30 @@ module.exports = {
 					id: first_player.id,
 					hand: [],
 					pp: no_pp ? 0 : 1,
+					wins: 0,
+					points: 0,
+					stats: {
+						cards_played: 0,
+						plus_4s_played: 0,
+						times_switched_color: 0,
+						cards_drawn: 0,
+					},
 				},
 				{
 					id: second_player.id,
 					hand: [],
 					pp: no_pp ? 0 : 1,
+					wins: 0,
+					points: 0,
+					stats: {
+						cards_played: 0,
+						plus_4s_played: 0,
+						times_switched_color: 0,
+						cards_drawn: 0,
+					},
 				},
 			],
+			matches_finished: 0,
 		};
 		await games.set(`${channel.id}`, game);
 		await message.reply(

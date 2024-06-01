@@ -4,13 +4,13 @@
 		"Y": "0xffaa00",
 		"G": "0x55aa55",
 		"B": "0x5555ff",
-		"W": "080808"
+		"WILD": "080808"
 	},
 	"display_names": {
 		"R": "Red",
 		"B": "Blue",
 		"G": "Green",
 		"Y": "Yellow",
-		"W": "WILD"
+		"WILD": "WILD"
 	}
 }

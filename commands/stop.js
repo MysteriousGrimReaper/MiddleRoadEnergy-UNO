@@ -4,7 +4,7 @@ const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
 	name: `stop`,
-	aliases: [`x`, `exit`],
+	aliases: [`x`, `exit`, `pause`, `p`],
 	async execute(message) {
 		const { channel } = message;
 		if (!(await games.get(`${channel.id}.on`))) {
@@ -12,6 +12,6 @@ module.exports = {
 			return;
 		}
 		await games.set(`${channel.id}.on`, false);
-		await channel.send(`UNO game stopped.`);
+		await channel.send(`UNO game paused.`);
 	},
 };
