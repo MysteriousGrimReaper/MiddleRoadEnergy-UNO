@@ -51,9 +51,16 @@ module.exports = {
 			.setStyle(ButtonStyle.Secondary)
 			.setLabel(`Table`)
 			.setEmoji(`🎨`);
+		const history_button = new ButtonBuilder()
+			.setCustomId(`history`)
+			.setStyle(ButtonStyle.Success)
+			.setLabel(`History`)
+			.setEmoji(`🔄`);
+
 		const button_row = new ActionRowBuilder().setComponents([
 			hand_button,
 			table_button,
+			history_button,
 		]);
 		return await message.reply({
 			embeds: [table_embed],

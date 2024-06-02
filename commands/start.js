@@ -20,9 +20,16 @@ const table_button = new ButtonBuilder()
 	.setStyle(ButtonStyle.Secondary)
 	.setLabel(`Table`)
 	.setEmoji(`🎨`);
+const history_button = new ButtonBuilder()
+	.setCustomId(`history`)
+	.setStyle(ButtonStyle.Success)
+	.setLabel(`History`)
+	.setEmoji(`🔄`);
+
 const button_row = new ActionRowBuilder().setComponents([
 	hand_button,
 	table_button,
+	history_button,
 ]);
 module.exports = {
 	name: `start`,
@@ -52,6 +59,8 @@ module.exports = {
 		game.on = true;
 		const player1 = `<@${game.players[0].id}>`;
 		game.table.cards.push(game.deck.pop());
+		game.players[0].hand = [];
+		game.players[1].hand = [];
 		for (let i = 0; i < starting_cards; i++) {
 			game.players[0].hand.push(game.deck.pop());
 			game.players[1].hand.push(game.deck.pop());

@@ -19,9 +19,16 @@ const table_button = new ButtonBuilder()
 	.setStyle(ButtonStyle.Secondary)
 	.setLabel(`Table`)
 	.setEmoji(`🎨`);
+const history_button = new ButtonBuilder()
+	.setCustomId(`history`)
+	.setStyle(ButtonStyle.Success)
+	.setLabel(`History`)
+	.setEmoji(`🔄`);
+
 const button_row = new ActionRowBuilder().setComponents([
 	hand_button,
 	table_button,
+	history_button,
 ]);
 module.exports = {
 	name: `play`,
