@@ -5,9 +5,10 @@ const games = db.table("games");
 module.exports = {
 	name: `bestof`,
 	aliases: [`bo`, `b`, `best`, `games`, `g`],
+	description: `Set the number of games in the match.`,
 	async execute(message, bestof) {
 		const { channel } = message;
-		if (isNaN(bestof) || bestof < 7) {
+		if (isNaN(bestof) || bestof < 1 || bestof > 99) {
 			return await channel.send(`Invalid number of games.`);
 		}
 		if (!(await games.get(channel.id))) {

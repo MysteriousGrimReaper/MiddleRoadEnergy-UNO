@@ -6,7 +6,7 @@ const games = db.table("games");
 module.exports = {
 	name: `callout`,
 	aliases: [`c`],
-	async execute(message, game) {
+	async execute(message, game, content) {
 		const { author, channel } = message;
 		const { on, table, deck, players } = game;
 		if (!on) {

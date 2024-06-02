@@ -26,7 +26,7 @@ const button_row = new ActionRowBuilder().setComponents([
 module.exports = {
 	name: `play`,
 	aliases: [`p`],
-	async execute(message, game) {
+	async execute(message, game, content) {
 		const { author, channel, client } = message;
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
@@ -74,7 +74,7 @@ module.exports = {
 			}
 			return color;
 		};
-		const args = message.content.toUpperCase().split(" ");
+		const args = content.toUpperCase().split(" ");
 		while (
 			args[0] == `UNO` ||
 			args[0] == `P` ||

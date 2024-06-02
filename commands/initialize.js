@@ -12,6 +12,7 @@ function shuffleArray(array) {
 module.exports = {
 	name: `initialize`,
 	aliases: [`init`, `i`],
+	description: `Initialize a match between two players by pinging them. This should only be run once at the start of a game set.`,
 	async execute(message) {
 		const no_pp = message.content.includes(`0pp`);
 		const channel = message?.mentions?.channels?.first() ?? message.channel;

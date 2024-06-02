@@ -27,6 +27,7 @@ const button_row = new ActionRowBuilder().setComponents([
 module.exports = {
 	name: `start`,
 	aliases: [`s`],
+	description: `Use this command to start a game. Make sure that the starting cards are set BEFORE using this command.`,
 	async execute(message) {
 		console.log(__dirname);
 		const { channel } = message;
@@ -42,6 +43,11 @@ module.exports = {
 				`There's a game going on in this channel already!`
 			);
 		}
+		if (game.players[0].hand.length >= 1) {
+			return await channel.send(
+				`A game has already started! Use \`ref continue\` to unpause it.`
+			);
+		}
 		const starting_cards = game.cards;
 		game.on = true;
 		const player1 = `<@${game.players[0].id}>`;
@@ -51,7 +57,7 @@ module.exports = {
 			game.players[1].hand.push(game.deck.pop());
 		}
 		await games.set(`${channel.id}`, game);
-		const top_card = game.table.cards[0];
+		const top_card = game.table.cards[game.table.cards.length - 1];
 		console.log();
 		const play_embed = new EmbedBuilder()
 			.setDescription(

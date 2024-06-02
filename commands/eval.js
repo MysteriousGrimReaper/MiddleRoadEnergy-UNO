@@ -5,6 +5,8 @@ const games = db.table("games");
 module.exports = {
 	name: `eval`,
 	aliases: [`e`],
+	debug: true,
+	description: `Evaluate JS code.`,
 	async execute(message) {
 		if (message.author.id != `315495597874610178`) {
 			return;

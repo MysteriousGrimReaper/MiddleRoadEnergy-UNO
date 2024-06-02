@@ -24,7 +24,7 @@ const button_row = new ActionRowBuilder().setComponents([
 ]);
 module.exports = {
 	name: `powerplay`,
-	aliases: [`pp`],
+	aliases: [`pp`, `PP`, `Pp`],
 	async execute(message, game) {
 		if (game.processing) {
 			return;
@@ -62,6 +62,7 @@ module.exports = {
 			game.players[current_turn].stats.cards_drawn += amount;
 			game.table.current_turn++;
 			game.table.current_turn %= 2;
+			game.powerplay = undefined;
 			const top_card = game.table.cards[game.table.cards.length - 1];
 			const play_embed = new EmbedBuilder()
 				.setDescription(

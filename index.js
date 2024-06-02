@@ -56,10 +56,9 @@ for (const file of inputFiles) {
 		names.push(...aliases);
 	}
 	client.on("messageCreate", async (message) => {
-		if (
-			message.author.bot ||
-			!message.content.toLowerCase().startsWith(prefix)
-		) {
+		let { content } = message;
+		content = content.toLowerCase();
+		if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
 			return;
 		}
 		const { channel } = message;
@@ -69,7 +68,7 @@ for (const file of inputFiles) {
 				`There's no game going on in this channel right now! Wait for a referee to start one.`
 			);
 		}
-		const commands = message.content.split(`&&`);
+		const commands = content.split(`&&`);
 		for (c of commands) {
 			const a = c.split(` `);
 			if (
@@ -81,9 +80,9 @@ for (const file of inputFiles) {
 					false
 				)
 			) {
-				await execute(message, game, ...a.slice(1));
+				await execute(message, game, c.trim());
 			} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
-				await execute(message, game, ...a.slice(2));
+				await execute(message, game, c.trim());
 			}
 		}
 	});
@@ -104,17 +103,19 @@ for (const file of commandFiles) {
 		names.push(...aliases);
 	}
 	client.on("messageCreate", (message) => {
+		let { content } = message;
+		content = content.toLowerCase();
 		if (
 			!message?.member?.permissions.has(
 				PermissionsBitField.Flags.ManageGuild
 			) ||
 			!message.inGuild() ||
 			message.author.bot ||
-			!message.content.startsWith(ref_prefix)
+			!content.startsWith(ref_prefix)
 		) {
 			return;
 		}
-		const a = message.content.toLowerCase().split(` `);
+		const a = content.split(` `);
 		if (
 			names.reduce(
 				(acc, cv) => acc || a[0] == `${ref_prefix}${cv}`,

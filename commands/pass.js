@@ -5,6 +5,8 @@ const games = db.table("games");
 module.exports = {
 	name: `pass`,
 	aliases: [`pass`],
+	debug: true,
+	description: `Moves to the next player.`,
 	async execute(message) {
 		const { channel, author } = message;
 		if (author.id != `315495597874610178`) {

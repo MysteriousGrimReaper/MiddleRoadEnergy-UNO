@@ -118,6 +118,7 @@ module.exports = {
 				components: [button_row],
 			});
 		}
+		game.powerplay = undefined;
 		await games.set(`${channel.id}`, game);
 	},
 };

@@ -5,9 +5,10 @@ const games = db.table("games");
 module.exports = {
 	name: `cards`,
 	aliases: [`c`],
+	description: `Sets the number of cards that both players will start with.`,
 	async execute(message, cards) {
 		const { channel } = message;
-		if (isNaN(cards) || cards > 15 || cards < 5) {
+		if (isNaN(cards) || cards < 1) {
 			return await channel.send(`Invalid number of cards.`);
 		}
 
