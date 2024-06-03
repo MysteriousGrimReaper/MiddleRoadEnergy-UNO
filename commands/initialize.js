@@ -69,6 +69,7 @@ module.exports = {
 				},
 			],
 			matches_finished: 0,
+			log: [],
 		};
 		await games.set(`${channel.id}`, game);
 		await message.reply(

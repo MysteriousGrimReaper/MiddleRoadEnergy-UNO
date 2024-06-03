@@ -32,71 +32,82 @@ module.exports = {
 							content: `You're not in the game!`,
 						});
 					} else {
-						const order = [`R`, `G`, `Y`, `B`, `WILD`];
-						const player = players.find((p) => p.id == author.id);
-						const player_hand_a = player.hand.toSorted(
-							(a, b) =>
-								order.indexOf(a.color) - order.indexOf(b.color)
-						);
-						const player_hand = player_hand_a.reduce(
-							(acc, cv, index) =>
-								acc +
-								`${
-									cv.color != player_hand_a[index - 1]?.color
-										? `\n- `
-										: ` | `
-								}${
-									cv.wild ||
-									cv.color == top_card.color ||
-									cv.icon == top_card.icon
-										? `**`
-										: ``
-								}${display_names[cv.color]}${
-									cv.wild && cv.icon == `` ? `` : ` `
-								}${cv.icon}${
-									cv.wild ||
-									cv.color == top_card.color ||
-									cv.icon == top_card.icon
-										? `**`
-										: ``
-								}`,
-							``
-						);
-						const hand_embed = new EmbedBuilder()
-							.setAuthor({
-								name: author.displayName,
-								iconURL: author.avatarURL(),
-							})
-							.setDescription(player_hand)
-							.setColor(
-								parseInt(
-									embed_colors[
-										game.table.cards[
-											game.table.cards.length - 1
-										].color
-									],
-									16
+						try {
+							const order = [`R`, `G`, `Y`, `B`, `WILD`];
+							const player = players.find(
+								(p) => p.id == author.id
+							);
+							const player_hand_a = player.hand.toSorted(
+								(a, b) =>
+									order.indexOf(a.color) -
+									order.indexOf(b.color)
+							);
+							const player_hand = player_hand_a.reduce(
+								(acc, cv, index) =>
+									acc +
+									`${
+										cv.color !=
+										player_hand_a[index - 1]?.color
+											? `\n- `
+											: ` | `
+									}${
+										cv.wild ||
+										cv.color == top_card.color ||
+										cv.icon == top_card.icon
+											? `**`
+											: ``
+									}${display_names[cv.color]}${
+										cv.wild && cv.icon == `` ? `` : ` `
+									}${cv.icon}${
+										cv.wild ||
+										cv.color == top_card.color ||
+										cv.icon == top_card.icon
+											? `**`
+											: ``
+									}`,
+								``
+							);
+							const hand_embed = new EmbedBuilder()
+								.setAuthor({
+									name: author.displayName,
+									iconURL: author.avatarURL(),
+								})
+								.setDescription(player_hand)
+								.setColor(
+									parseInt(
+										embed_colors[
+											game.table.cards[
+												game.table.cards.length - 1
+											].color
+										],
+										16
+									)
 								)
-							)
-							.setFooter({
-								text: `${
-									player.hand.length
-								} cards | Current card: ${
-									display_names[
+								.setFooter({
+									text: `${
+										player.hand.length
+									} cards | Current card: ${
+										display_names[
+											game.table.cards[
+												game.table.cards.length - 1
+											].color
+										]
+									} ${
 										game.table.cards[
 											game.table.cards.length - 1
-										].color
-									]
-								} ${
-									game.table.cards[
-										game.table.cards.length - 1
-									].icon
-								}`,
+										].icon
+									}`,
+								});
+							return await interaction.editReply({
+								ephemeral: true,
+								embeds: [hand_embed],
 							});
-						return await interaction.editReply({
-							ephemeral: true,
-							embeds: [hand_embed],
-						});
+						} catch (error) {
+							return await interaction.editReply({
+								ephemeral: true,
+								content: `An error has occurred!`,
+							});
+						}
 					}
 				case `table`:
 					const table_embed = new EmbedBuilder()
@@ -204,6 +215,7 @@ module.exports = {
 					});
 			}
 		} catch (error) {
+			await interaction.editReply(`An error has occurred!`);
 			console.log(error);
 		}
 	},

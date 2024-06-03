@@ -65,7 +65,10 @@ module.exports = {
 			game.players[0].hand.push(game.deck.pop());
 			game.players[1].hand.push(game.deck.pop());
 		}
-		await games.set(`${channel.id}`, game);
+		if (!game.log) {
+			game.log = [];
+		}
+		game.log.push({ start: Date.now(), end: undefined, winner: undefined });
 		const top_card = game.table.cards[game.table.cards.length - 1];
 		console.log();
 		const play_embed = new EmbedBuilder()
@@ -88,5 +91,7 @@ module.exports = {
 			embeds: [play_embed],
 			components: [button_row],
 		});
+
+		await games.set(`${channel.id}`, game);
 	},
 };

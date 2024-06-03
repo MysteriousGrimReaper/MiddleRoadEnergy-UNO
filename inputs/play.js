@@ -82,6 +82,7 @@ module.exports = {
 			return color;
 		};
 		const args = content.toUpperCase().split(" ");
+		const uno_flag = content.includes(`!`);
 		while (
 			args[0] == `UNO` ||
 			args[0] == `P` ||
@@ -245,6 +246,8 @@ module.exports = {
 				}
 				game.deck = shuffleArray(base);
 				game.on = false;
+				game.log[game.matches_finished].end = Date.now();
+				game.log[game.matches_finished].winner = current_turn;
 				game.matches_finished++;
 				if (game.matches_finished < Math.ceil(game.bestof / 2) / 2) {
 					game.table.current_turn = 0;
@@ -266,8 +269,14 @@ module.exports = {
 				}${game.players[1].wins} ${users[1].globalName}${
 					status <= 0 ? `**` : ``
 				}`;
+				const final_embed_title =
+					game.matches_finished == game.bestof
+						? status > 0
+							? `${users[0].globalName} HAS WON THE MATCH! (${game.players[0].wins}-${game.players[1].wins})`
+							: `${users[1].globalName} HAS WON THE MATCH! (${game.players[1].wins}-${game.players[0].wins})`
+						: `Current Match Statistics`;
 				const stats_embed = new EmbedBuilder()
-					.setTitle(`Current Match Statistics`)
+					.setTitle(final_embed_title)
 					.setDescription(`${scoreboard}`)
 					.addFields(
 						{
@@ -288,7 +297,27 @@ module.exports = {
 						}
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
-					.setThumbnail(users[current_turn].avatarURL());
+					.setThumbnail(users[current_turn].avatarURL())
+					.setFooter({
+						text:
+							game.matches_finished == game.bestof
+								? `Congratulations, ${
+										status > 0
+											? users[0].globalName
+											: users[1].globalName
+								  }!`
+								: `${
+										users[game.table.current_turn]
+											.globalName
+								  } starts the next match! Referee, make sure to use ref cards <number> to set the card count before the match starts.`,
+						iconURL:
+							game.matches_finished == game.bestof
+								? status > 0
+									? users[0].avatarURL()
+									: users[1].avatarURL()
+								: users[game.table.current_turn].avatarURL(),
+					});
+
 				await channel.send({ embeds: [stats_embed] });
 				return await games.set(`${channel.id}`, game);
 			}
@@ -429,6 +458,12 @@ module.exports = {
 					embeds: [pp_embed],
 					components: [button_row],
 				});
+			}
+			if (uno_flag && game.players[current_turn].hand.length == 1) {
+				game.players[current_turn].uno = uno_flag;
+				await channel.send(
+					`**UNO!!** <@${game.players[current_turn].id}> only has 1 card left!`
+				);
 			}
 			await games.set(`${channel.id}`, game);
 		} else {

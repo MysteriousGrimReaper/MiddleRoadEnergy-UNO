@@ -70,7 +70,7 @@ for (const file of inputFiles) {
 		}
 		const commands = content.split(`&&`);
 		for (c of commands) {
-			const a = c.split(` `);
+			const a = c.trim().split(` `);
 			if (
 				names.reduce(
 					(acc, cv) =>
