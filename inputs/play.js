@@ -484,4 +484,9 @@ module.exports = {
 					`**UNO!!** ${game.players[current_turn].name} only has 1 card left!`
 				);
 			}
-			await games.set(`${channel.id}`, gam
+			await games.set(`${channel.id}`, game);
+		} else {
+			return await channel.send("Sorry, you can't play that card here!");
+		}
+	},
+};
