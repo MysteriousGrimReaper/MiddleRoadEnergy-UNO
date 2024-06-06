@@ -30,11 +30,11 @@ module.exports = {
 					} minutes**\n`,
 				``
 			) +
-			`\n\n**Total Time: ${
+			`\n**Total Time: ${
 				Math.floor(
 					(log[log.length - 1].end - log[0].start) / 1000 / 60
 				) % 60
-			}`;
+			}**`;
 		return await channel.send(log_text);
 	},
 };
