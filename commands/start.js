@@ -57,7 +57,8 @@ module.exports = {
 		}
 		const starting_cards = game.cards;
 		game.on = true;
-		const player1 = `<@${game.players[0].id}>`;
+		game.powerplay = false;
+		const player1 = `${game.players[0].name}`;
 		game.table.cards.push(game.deck.pop());
 		game.players[0].hand = [];
 		game.players[1].hand = [];
@@ -68,7 +69,12 @@ module.exports = {
 		if (!game.log) {
 			game.log = [];
 		}
-		game.log.push({ start: Date.now(), end: undefined, winner: undefined });
+		game.log.push({
+			start: Date.now(),
+			end: undefined,
+			winner: undefined,
+			cards: starting_cards,
+		});
 		const top_card = game.table.cards[game.table.cards.length - 1];
 		console.log();
 		const play_embed = new EmbedBuilder()

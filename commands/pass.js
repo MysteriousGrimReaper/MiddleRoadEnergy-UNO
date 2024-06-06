@@ -1,14 +1,42 @@
 const { QuickDB } = require("quick.db");
-const { base } = require("../deck.json");
+const { display_names, embed_colors } = require("../enums.json");
+const {
+	EmbedBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ActionRowBuilder,
+} = require("discord.js");
+const hand_button = new ButtonBuilder()
+	.setCustomId(`hand`)
+	.setStyle(ButtonStyle.Primary)
+	.setLabel(`Hand`)
+	.setEmoji(`🎴`);
+const table_button = new ButtonBuilder()
+	.setCustomId(`table`)
+	.setStyle(ButtonStyle.Secondary)
+	.setLabel(`Table`)
+	.setEmoji(`🎨`);
+const history_button = new ButtonBuilder()
+	.setCustomId(`history`)
+	.setStyle(ButtonStyle.Success)
+	.setLabel(`History`)
+	.setEmoji(`🔄`);
+
+const button_row = new ActionRowBuilder().setComponents([
+	hand_button,
+	table_button,
+	history_button,
+]);
 const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
 	name: `pass`,
-	aliases: [`pass`],
+	aliases: [`p`],
 	description: `Moves to the next player.`,
 	async execute(message) {
 		const { channel, author } = message;
 		const game = await games.get(channel.id);
+		const { table, on } = game;
 		const { current_turn, cards } = table;
 		if (game.processing) {
 			game.processing = undefined;
@@ -32,11 +60,11 @@ module.exports = {
 		const top_card = game.table.cards[game.table.cards.length - 1];
 		const play_embed = new EmbedBuilder()
 			.setDescription(
-				`(inactive, pass) <@${
-					game.players[current_turn].id
-				}> drew a card. \n\nIt is now <@${
-					game.players[game.table.current_turn].id
-				}>'s turn!`
+				`(inactive, pass) ${
+					game.players[current_turn].name
+				} drew a card. \n\nIt is now ${
+					game.players[game.table.current_turn].name
+				}'s turn!`
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
@@ -66,11 +94,11 @@ module.exports = {
 			game.table.current_turn %= 2;
 			const pp_embed = new EmbedBuilder()
 				.setDescription(
-					`**POWER PLAY!!** <@${
-						game.players[1 - current_turn].id
-					}> drew a card.\n\nIt is now <@${
-						game.players[game.table.current_turn].id
-					}>'s turn!`
+					`**POWER PLAY!!** ${
+						game.players[1 - current_turn].name
+					} drew a card.\n\nIt is now ${
+						game.players[game.table.current_turn].name
+					}'s turn!`
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(

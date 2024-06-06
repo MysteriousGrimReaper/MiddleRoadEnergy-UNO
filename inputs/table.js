@@ -21,13 +21,13 @@ module.exports = {
 		const top_card = cards[cards.length - 1];
 		const table_embed = new EmbedBuilder()
 			.setDescription(
-				`It's currently <@${
-					players[current_turn].id
-				}>'s turn. The current card is **${
+				`It's currently ${
+					players[current_turn].name
+				}'s turn. The current card is **${
 					display_names[top_card.color]
-				} ${top_card.icon}**.\n\n<@${players[0].id}> - **${
+				} ${top_card.icon}**.\n\n${players[0].name} - **${
 					players[0].hand.length
-				} cards**\n<@${players[1].id}> - **${
+				} cards**\n${players[1].name} - **${
 					players[1].hand.length
 				} cards**`
 			)

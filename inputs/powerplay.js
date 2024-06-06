@@ -50,6 +50,9 @@ module.exports = {
 		if (players.find((p) => p.id == author.id).pp < 1) {
 			return await message.reply(`You used your power play already!`);
 		}
+		if (game.powerplay) {
+			return await message.reply(`A power play is already active!`);
+		}
 		game.powerplay = true;
 		game.players.find((p) => p.id == author.id).pp--;
 		if (
@@ -73,11 +76,11 @@ module.exports = {
 			const top_card = game.table.cards[game.table.cards.length - 1];
 			const play_embed = new EmbedBuilder()
 				.setDescription(
-					`**POWER PLAY!!** <@${
-						game.players[current_turn].id
-					}> drew a card.\n\nIt is now <@${
-						game.players[game.table.current_turn].id
-					}>'s turn!`
+					`**POWER PLAY!!** ${
+						game.players[current_turn].name
+					} drew a card.\n\nIt is now ${
+						game.players[game.table.current_turn].name
+					}'s turn!`
 				)
 				.setColor(
 					parseInt(

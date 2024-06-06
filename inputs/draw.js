@@ -69,11 +69,11 @@ module.exports = {
 		const top_card = game.table.cards[game.table.cards.length - 1];
 		const play_embed = new EmbedBuilder()
 			.setDescription(
-				`<@${
-					game.players[current_turn].id
-				}> drew a card. \n\nIt is now <@${
-					game.players[game.table.current_turn].id
-				}>'s turn!`
+				`${
+					game.players[current_turn].name
+				} drew a card. \n\nIt is now ${
+					game.players[game.table.current_turn].name
+				}'s turn!`
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
@@ -103,11 +103,11 @@ module.exports = {
 			game.table.current_turn %= 2;
 			const pp_embed = new EmbedBuilder()
 				.setDescription(
-					`**POWER PLAY!!** <@${
-						game.players[1 - current_turn].id
-					}> drew a card.\n\nIt is now <@${
-						game.players[game.table.current_turn].id
-					}>'s turn!`
+					`**POWER PLAY!!** ${
+						game.players[1 - current_turn].name
+					} drew a card.\n\nIt is now ${
+						game.players[game.table.current_turn].name
+					}'s turn!`
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(

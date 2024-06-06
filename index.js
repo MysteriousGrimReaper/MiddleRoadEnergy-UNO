@@ -46,7 +46,7 @@ const inputsPath = path.join(__dirname, "inputs");
 const inputFiles = fs
 	.readdirSync(inputsPath)
 	.filter((file) => file.endsWith(".js"));
-
+const command_inputs = [];
 for (const file of inputFiles) {
 	const filePath = path.join(inputsPath, file);
 	const input = require(filePath);
@@ -55,22 +55,28 @@ for (const file of inputFiles) {
 	if (aliases) {
 		names.push(...aliases);
 	}
-	client.on("messageCreate", async (message) => {
-		let { content } = message;
-		content = content.toLowerCase();
-		if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
-			return;
-		}
-		const { channel } = message;
-		const game = await games.get(channel.id);
-		if (!game) {
-			return await message.reply(
-				`There's no game going on in this channel right now! Wait for a referee to start one.`
-			);
-		}
-		const commands = content.split(`&&`);
-		for (c of commands) {
-			const a = c.trim().split(` `);
+	command_inputs.push({ names, input, execute });
+}
+client.on("messageCreate", async (message) => {
+	console.log(message);
+	let { content } = message;
+	content = content.toLowerCase();
+	if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
+		return;
+	}
+	const { channel } = message;
+	const game = await games.get(channel.id);
+	if (!game) {
+		return await message.reply(
+			`There's no game going on in this channel right now! Wait for a referee to start one.`
+		);
+	}
+	console.log(game);
+	const commands = content.split(`&&`);
+	for (c of commands) {
+		const a = c.trim().split(` `);
+		for (ci of command_inputs) {
+			const { names, execute, input } = ci;
 			if (
 				names.reduce(
 					(acc, cv) =>
@@ -85,9 +91,8 @@ for (const file of inputFiles) {
 				await execute(message, game, c.trim());
 			}
 		}
-	});
-}
-
+	}
+});
 // ref commands
 const commandsPath = path.join(__dirname, "commands");
 const commandFiles = fs

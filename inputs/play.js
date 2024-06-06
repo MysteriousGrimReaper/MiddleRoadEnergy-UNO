@@ -56,7 +56,6 @@ module.exports = {
 		for (const p of players) {
 			users.push(await client.users.fetch(p.id));
 		}
-		console.log(users);
 		const parseColor = (color) => {
 			switch ((color || "").toLowerCase()) {
 				case "red":
@@ -170,7 +169,6 @@ module.exports = {
 			}
 			await games.delete(`${channel.id}.processing`);
 			color = _color;
-			console.log("Getting card:", color, icon);
 			if (alias[icon.toUpperCase()]) {
 				icon = alias[icon.toUpperCase()];
 			}
@@ -178,7 +176,6 @@ module.exports = {
 				message.author.id == players[0].id
 					? players[0].hand
 					: players[1].hand;
-			console.log("Searching for card " + icon);
 			if (["WILD", "WILD+4"].includes(icon.toUpperCase())) {
 				let card = hand.find(
 					(c) =>
@@ -186,7 +183,6 @@ module.exports = {
 						"WILD" + c.icon === icon.toUpperCase()
 				);
 				if (!card) {
-					console.log(`Not a card.`);
 					return undefined;
 				}
 				card.color = color;
@@ -224,7 +220,7 @@ module.exports = {
 			game.players[current_turn].uno = false;
 			if (game.players[current_turn].hand.length === 0) {
 				await channel.send(
-					`Good game! <@${game.players[current_turn].id}> has won!`
+					`Good game! ${game.players[current_turn].name} has won!`
 				);
 				game.players[current_turn].wins++;
 				// reset
@@ -262,38 +258,56 @@ module.exports = {
 						: game.players[0].wins < game.players[1].wins
 						? -1
 						: 0;
-				const scoreboard = `${status >= 0 ? `**` : ``}${
-					users[0].globalName
-				} ${game.players[0].wins}${status > 0 ? `**` : ``} - ${
-					status < 0 ? `**` : ``
-				}${game.players[1].wins} ${users[1].globalName}${
-					status <= 0 ? `**` : ``
-				}`;
-				const final_embed_title =
-					game.matches_finished == game.bestof
-						? status > 0
-							? `${users[0].globalName} HAS WON THE MATCH! (${game.players[0].wins}-${game.players[1].wins})`
-							: `${users[1].globalName} HAS WON THE MATCH! (${game.players[1].wins}-${game.players[0].wins})`
-						: `Current Match Statistics`;
+				const names = players.map((p) => p.name);
+				const scoreboard = `${status >= 0 ? `**` : ``}${names[0]} ${
+					game.players[0].wins
+				}${status > 0 ? `**` : ``} - ${status < 0 ? `**` : ``}${
+					game.players[1].wins
+				} ${names[1]}${status <= 0 ? `**` : ``}`;
+				const match_is_finished =
+					game.bestof / 2 < game.players[0].wins ||
+					game.bestof / 2 < game.players[1].wins ||
+					game.matches_finished == game.bestof;
+				const final_embed_title = match_is_finished
+					? status > 0
+						? `${names[0]} HAS WON THE MATCH! (${game.players[0].wins}-${game.players[1].wins})`
+						: `${names[1]} HAS WON THE MATCH! (${game.players[1].wins}-${game.players[0].wins})`
+					: `Current Match Statistics`;
 				const stats_embed = new EmbedBuilder()
 					.setTitle(final_embed_title)
 					.setDescription(`${scoreboard}`)
 					.addFields(
 						{
 							name: `Cards Played`,
-							value: `${users[0].globalName} - ${game.players[0].stats.cards_played}\n${users[1].globalName} - ${game.players[1].stats.cards_played}`,
+							value: `${names[0]} - ${game.players[0].stats.cards_played}\n${names[1]} - ${game.players[1].stats.cards_played}`,
+						},
+						{
+							name: `WILDs Played`,
+							value: `${names[0]} - ${game.players[0].stats.wilds_played}\n${names[1]} - ${game.players[1].stats.wilds_played}`,
+						},
+						{
+							name: `Reverses Played`,
+							value: `${names[0]} - ${game.players[0].stats.reverses_played}\n${names[1]} - ${game.players[1].stats.reverses_played}`,
+						},
+						{
+							name: `Skips Played`,
+							value: `${names[0]} - ${game.players[0].stats.skips_played}\n${names[1]} - ${game.players[1].stats.skips_played}`,
+						},
+						{
+							name: `+2s Played`,
+							value: `${names[0]} - ${game.players[0].stats.plus_2s_played}\n${names[1]} - ${game.players[1].stats.plus_2s_played}`,
 						},
 						{
 							name: `WILD +4s Played`,
-							value: `${users[0].globalName} - ${game.players[0].stats.plus_4s_played}\n${users[1].globalName} - ${game.players[1].stats.plus_4s_played}`,
+							value: `${names[0]} - ${game.players[0].stats.plus_4s_played}\n${names[1]} - ${game.players[1].stats.plus_4s_played}`,
 						},
 						{
 							name: `Times Switched Color`,
-							value: `${users[0].globalName} - ${game.players[0].stats.times_switched_color}\n${users[1].globalName} - ${game.players[1].stats.times_switched_color}`,
+							value: `${names[0]} - ${game.players[0].stats.times_switched_color}\n${names[1]} - ${game.players[1].stats.times_switched_color}`,
 						},
 						{
 							name: `Cards Drawn`,
-							value: `${users[0].globalName} - ${game.players[0].stats.cards_drawn}\n${users[1].globalName} - ${game.players[1].stats.cards_drawn}`,
+							value: `${names[0]} - ${game.players[0].stats.cards_drawn}\n${names[1]} - ${game.players[1].stats.cards_drawn}`,
 						}
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
@@ -302,9 +316,7 @@ module.exports = {
 						text:
 							game.matches_finished == game.bestof
 								? `Congratulations, ${
-										status > 0
-											? users[0].globalName
-											: users[1].globalName
+										status > 0 ? names[0] : names[1]
 								  }!`
 								: `${
 										users[game.table.current_turn]
@@ -325,14 +337,20 @@ module.exports = {
 			let extra = "";
 			switch (card.icon) {
 				case "REVERSE":
+					game.players[current_turn].stats.reverses_played++;
 				case "SKIP":
+					game.players[current_turn].stats.skips_played++;
+					if (card.icon == `REVERSE`) {
+						game.players[current_turn].stats.reverses_played--;
+					}
 					game.table.current_turn++;
 					game.table.current_turn %= 2;
-					extra = `Sorry, <@${
-						game.players[game.table.current_turn].id
-					}>! Skip a turn! `;
+					extra = `Sorry, ${
+						game.players[game.table.current_turn].name
+					}! Skip a turn! `;
 					break;
 				case "+2":
+					game.players[current_turn].stats.plus_2s_played++;
 					let amount = 0;
 					for (let i = table.cards.length - 1; i >= 0; i--) {
 						if (table.cards[i].icon === "+2") {
@@ -351,14 +369,15 @@ module.exports = {
 					const draw_chunk = game.deck.splice(0, amount);
 					game.players[1 - current_turn].hand.push(...draw_chunk);
 					game.players[1 - current_turn].stats.cards_drawn += amount;
-					extra = `<@${
-						game.players[1 - current_turn].id
-					}> picks up ${amount} cards! Tough break. `;
+					extra = `${
+						game.players[1 - current_turn].name
+					} picks up ${amount} cards! Tough break. `;
 					extra += " Also, skip a turn!";
 					game.table.current_turn++;
 					game.table.current_turn %= 2;
 					break;
 				case "WILD":
+					game.players[current_turn].stats.wilds_played++;
 					extra = `In case you missed it, the current color is now **${
 						display_names[
 							game.table.cards[game.table.cards.length - 1]
@@ -379,9 +398,9 @@ module.exports = {
 					const draw_chunk = game.deck.splice(0, amount);
 					game.players[1 - current_turn].hand.push(...draw_chunk);
 					game.players[1 - current_turn].stats.cards_drawn += amount;
-					extra = `<@${
-						game.players[1 - current_turn].id
-					}> picks up 4! The current color is now **${
+					extra = `${
+						game.players[1 - current_turn].name
+					} picks up 4! The current color is now **${
 						display_names[
 							game.table.cards[game.table.cards.length - 1].color
 						]
@@ -402,9 +421,9 @@ module.exports = {
 						top_card.wild ? `WILD` : ``
 					}${
 						top_card.icon
-					}** has been played. ${extra}\n\nIt is now <@${
-						game.players[game.table.current_turn].id
-					}>'s turn!`
+					}** has been played. ${extra}\n\nIt is now ${
+						game.players[game.table.current_turn].name
+					}'s turn!`
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
@@ -437,11 +456,11 @@ module.exports = {
 				game.table.current_turn %= 2;
 				const pp_embed = new EmbedBuilder()
 					.setDescription(
-						`**POWER PLAY!!** <@${
-							game.players[1 - current_turn].id
-						}> drew a card. ${extra}\n\nIt is now <@${
-							game.players[game.table.current_turn].id
-						}>'s turn!`
+						`**POWER PLAY!!** ${
+							game.players[1 - current_turn].name
+						} drew a card. ${extra}\n\nIt is now ${
+							game.players[game.table.current_turn].name
+						}'s turn!`
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(
@@ -462,12 +481,7 @@ module.exports = {
 			if (uno_flag && game.players[current_turn].hand.length == 1) {
 				game.players[current_turn].uno = uno_flag;
 				await channel.send(
-					`**UNO!!** <@${game.players[current_turn].id}> only has 1 card left!`
+					`**UNO!!** ${game.players[current_turn].name} only has 1 card left!`
 				);
 			}
-			await games.set(`${channel.id}`, game);
-		} else {
-			return await channel.send("Sorry, you can't play that card here!");
-		}
-	},
-};
+			await games.set(`${channel.id}`, gam

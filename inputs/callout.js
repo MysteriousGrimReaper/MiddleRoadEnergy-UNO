@@ -35,13 +35,9 @@ module.exports = {
 		const draw_chunk = game.deck.splice(0, amount);
 		game.players[1 - player].hand.push(...draw_chunk);
 		game.players[1 - player].stats.cards_drawn += amount;
-		const danger_embed = new EmbedBuilder()
-			.setColor(0xaaaaaa)
-			.setDescription(
-				`Uh oh! <@${player_called_out.id}>, you didn't say UNO! Pick up 3!`
-			);
-
-		await channel.send({ embeds: [danger_embed] });
+		await channel.send(
+			`Uh oh! **${player_called_out.name}**, you didn't say UNO! Pick up 3!`
+		);
 		return await games.set(channel.id, game);
 	},
 };

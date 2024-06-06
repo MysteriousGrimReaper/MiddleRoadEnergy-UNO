@@ -4,7 +4,7 @@ const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
 	name: `stop`,
-	aliases: [`x`, `exit`, `pause`, `p`],
+	aliases: [`x`, `exit`],
 	description: `Pause a game occurring in the channel. The game will still be ongoing, but players cannot send inputs.`,
 	async execute(message) {
 		const { channel } = message;

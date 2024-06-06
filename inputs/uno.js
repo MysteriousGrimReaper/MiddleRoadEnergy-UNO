@@ -18,11 +18,11 @@ module.exports = {
 		const player = players.findIndex((p) => p.id == author.id);
 		if (game.players[player].hand.length != 1) {
 			game.players[player].uno = false;
-			return;
+			return await channel.send(`You have more than 1 card left!`);
 		}
 		game.players[player].uno = true;
 		await channel.send(
-			`**UNO!!** <@${players[player].id}> only has 1 card left!`
+			`**UNO!!** ${players[player].name} only has 1 card left!`
 		);
 		await games.set(channel.id, game);
 	},
