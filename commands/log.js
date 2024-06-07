@@ -19,6 +19,9 @@ module.exports = {
 		if (log?.length < 1) {
 			return await channel.send(`There are no logs for this game yet!`);
 		}
+		const total_time = log
+			.map((l) => l.end - l.start)
+			.reduce((acc, cv) => acc + cv, 0);
 		const log_text =
 			log.reduce(
 				(acc, cv) =>
@@ -27,14 +30,12 @@ module.exports = {
 						players[cv.winner].name
 					} - ${cv.cards} cards - ${
 						Math.floor((cv.end - cv.start) / 1000 / 60) % 60
-					} minutes**\n`,
+					}m ${Math.floor((cv.end - cv.start) / 1000) % 60}s**\n`,
 				``
 			) +
-			`\n**Total Time: ${
-				Math.floor(
-					(log[log.length - 1].end - log[0].start) / 1000 / 60
-				) % 60
-			}**`;
+			`\n**Total Time: ${Math.floor(total_time / 1000 / 60) % 60}m ${
+				Math.floor(total_time / 1000) % 60
+			}s**`;
 		return await channel.send(log_text);
 	},
 };

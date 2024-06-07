@@ -4,6 +4,7 @@ const { QuickDB } = require("quick.db");
 
 const db = new QuickDB();
 const games = db.table("games");
+const settings = db.table("settings");
 const {
 	Client,
 	Collection,
@@ -57,22 +58,29 @@ for (const file of inputFiles) {
 	}
 	command_inputs.push({ names, input, execute });
 }
-client.on("messageCreate", async (message) => {
+const uno_message_listener = async (message) => {
+	client.off("messageCreate", uno_message_listener);
 	console.log(message);
 	let { content } = message;
 	content = content.toLowerCase();
 	if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
+		client.on("messageCreate", uno_message_listener);
 		return;
 	}
-	const { channel } = message;
+	const { channel, guildId } = message;
 	const game = await games.get(channel.id);
+	const setting = await settings.get(guildId);
 	if (!game) {
+		client.on("messageCreate", uno_message_listener);
 		return await message.reply(
 			`There's no game going on in this channel right now! Wait for a referee to start one.`
 		);
 	}
 	console.log(game);
 	const commands = content.split(`&&`);
+	if (setting.max_command_chain > 0) {
+		commands.splice(setting.max_command_chain);
+	}
 	for (c of commands) {
 		const a = c.trim().split(` `);
 		for (ci of command_inputs) {
@@ -92,7 +100,10 @@ client.on("messageCreate", async (message) => {
 			}
 		}
 	}
-});
+	client.on("messageCreate", uno_message_listener);
+};
+client.on("messageCreate", uno_message_listener);
+
 // ref commands
 const commandsPath = path.join(__dirname, "commands");
 const commandFiles = fs

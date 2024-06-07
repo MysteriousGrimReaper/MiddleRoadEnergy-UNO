@@ -7,12 +7,19 @@ const hand = require("../inputs/hand");
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
-		await interaction.deferReply({ ephemeral: true });
+		if (!interaction?.isButton()) {
+			return;
+		}
+		console.log(`interaction created`);
 		try {
+			console.log(`deferring reply`);
+			await interaction.deferReply({ ephemeral: true });
+
 			const { user, channel, customId } = interaction;
 			if (!interaction.isButton()) {
 				return;
 			}
+			console.log(`getting game`);
 			const game = await games.get(channel.id);
 			if (!game) {
 				return await interaction.editReply({
@@ -37,6 +44,14 @@ module.exports = {
 							const player = players.find(
 								(p) => p.id == author.id
 							);
+							const max_clock = player.hand.reduce(
+								(acc, cv) => (acc > cv.clock ? acc : cv.clock),
+								0
+							);
+							const italicize = (value) =>
+								value.clock == max_clock &&
+								game.clock != 0 &&
+								false;
 							const player_hand_a = player.hand.toSorted(
 								(a, b) =>
 									order.indexOf(a.color) -
@@ -50,21 +65,21 @@ module.exports = {
 										player_hand_a[index - 1]?.color
 											? `\n- `
 											: ` | `
-									}${
+									}${italicize(cv) ? `*` : ``}${
 										cv.wild ||
 										cv.color == top_card.color ||
 										cv.icon == top_card.icon
 											? `**`
 											: ``
 									}${display_names[cv.color]}${
-										cv.wild && cv.icon == `` ? `` : ` `
+										cv.icon == `` ? `` : ` `
 									}${cv.icon}${
 										cv.wild ||
 										cv.color == top_card.color ||
 										cv.icon == top_card.icon
 											? `**`
 											: ``
-									}`,
+									}${italicize(cv) ? `*` : ``}`,
 								``
 							);
 							const hand_embed = new EmbedBuilder()
@@ -110,34 +125,45 @@ module.exports = {
 						}
 					}
 				case `table`:
-					const table_embed = new EmbedBuilder()
-						.setDescription(
-							`It's currently ${
-								players[current_turn].name
-							}'s turn. The current card is **${
-								display_names[top_card.color]
-							} ${top_card.icon}**.\n\n${players[0].name} - **${
-								players[0].hand.length
-							} cards | ${players[0].pp} PP**\n${
-								players[1].name
-							} - **${players[1].hand.length} cards | ${
-								players[1].pp
-							} PP**`
-						)
-						.setColor(parseInt(embed_colors[top_card.color], 16))
-						.setThumbnail(
-							`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
-								top_card.color
-							}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-						)
-						.setFooter({
-							iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
-							text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
+					try {
+						const table_embed = new EmbedBuilder()
+							.setDescription(
+								`It's currently ${
+									players[current_turn].name
+								}'s turn. The current card is **${
+									display_names[top_card.color]
+								} ${top_card.icon}**.\n\n${
+									players[0].name
+								} - **${players[0].hand.length} cards | ${
+									players[0].pp
+								} PP**\n${players[1].name} - **${
+									players[1].hand.length
+								} cards | ${players[1].pp} PP**`
+							)
+							.setColor(
+								parseInt(embed_colors[top_card.color], 16)
+							)
+							.setThumbnail(
+								`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+									top_card.color
+								}${top_card.wild ? `WILD` : ``}${
+									top_card.icon
+								}.png`
+							)
+							.setFooter({
+								iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+								text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
+							});
+						return await interaction.editReply({
+							ephemeral: true,
+							embeds: [table_embed],
 						});
-					return await interaction.editReply({
-						ephemeral: true,
-						embeds: [table_embed],
-					});
+					} catch (error) {
+						return await interaction.editReply({
+							ephemeral: true,
+							content: `An error has occurred!`,
+						});
+					}
 				case `history`:
 					if (
 						!game.players
@@ -215,7 +241,6 @@ module.exports = {
 					});
 			}
 		} catch (error) {
-			await interaction.editReply(`An error has occurred!`);
 			console.log(error);
 		}
 	},

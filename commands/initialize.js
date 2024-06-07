@@ -48,11 +48,12 @@ module.exports = {
 			on: false,
 			bestof: 7,
 			cards: 7,
+			clock: 0,
 			table: {
 				cards: [],
 				current_turn: 0,
 			},
-			deck: shuffleArray(oops_all_wild), // SWITCH THIS BACK TO base
+			deck: shuffleArray(base), // SWITCH THIS BACK TO base
 			players: [
 				{
 					name: first_name,

@@ -5,8 +5,8 @@ const db = new QuickDB();
 const names = db.table("names");
 const games = db.table("games");
 module.exports = {
-	name: `register`,
-	aliases: [`r`, `name`],
+	name: `name`,
+	aliases: [`name`],
 	async execute(message, game) {
 		const { author, channel } = message;
 		const args = message.content.split(` `);

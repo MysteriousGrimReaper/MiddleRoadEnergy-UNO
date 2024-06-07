@@ -9,6 +9,7 @@ const {
 } = require("discord.js");
 const db = new QuickDB();
 const games = db.table("games");
+const settings = db.table("settings");
 const hand_button = new ButtonBuilder()
 	.setCustomId(`hand`)
 	.setStyle(ButtonStyle.Primary)
@@ -80,7 +81,8 @@ module.exports = {
 			}
 			return color;
 		};
-		const args = content.toUpperCase().split(" ");
+		let args = content.toUpperCase().split(" ");
+		args = args.filter((a) => !a.includes(`!`));
 		const uno_flag = content.includes(`!`);
 		while (
 			args[0] == `UNO` ||
@@ -91,6 +93,7 @@ module.exports = {
 		) {
 			args.shift();
 		}
+
 		const getCard = async () => {
 			let color, icon;
 
@@ -319,8 +322,7 @@ module.exports = {
 										status > 0 ? names[0] : names[1]
 								  }!`
 								: `${
-										users[game.table.current_turn]
-											.globalName
+										players[game.table.current_turn].name
 								  } starts the next match! Referee, make sure to use ref cards <number> to set the card count before the match starts.`,
 						iconURL:
 							game.matches_finished == game.bestof
@@ -335,14 +337,12 @@ module.exports = {
 			}
 
 			let extra = "";
+			// stats switch
 			switch (card.icon) {
 				case "REVERSE":
 					game.players[current_turn].stats.reverses_played++;
 				case "SKIP":
 					game.players[current_turn].stats.skips_played++;
-					if (card.icon == `REVERSE`) {
-						game.players[current_turn].stats.reverses_played--;
-					}
 					game.table.current_turn++;
 					game.table.current_turn %= 2;
 					extra = `Sorry, ${
@@ -377,7 +377,6 @@ module.exports = {
 					game.table.current_turn %= 2;
 					break;
 				case "WILD":
-					game.players[current_turn].stats.wilds_played++;
 					extra = `In case you missed it, the current color is now **${
 						display_names[
 							game.table.cards[game.table.cards.length - 1]
@@ -410,6 +409,9 @@ module.exports = {
 					game.table.current_turn %= 2;
 					break;
 				}
+			}
+			if (card.wild && card.icon != `+4`) {
+				game.players[current_turn].stats.wilds_played++;
 			}
 			game.table.current_turn++;
 			game.table.current_turn %= 2;
@@ -484,6 +486,20 @@ module.exports = {
 					`**UNO!!** ${game.players[current_turn].name} only has 1 card left!`
 				);
 			}
+			if (game.clock == undefined) {
+				game.clock = 0;
+			}
+			game.clock++;
+			game.players[0].hand.forEach((c) => {
+				if (c.clock == undefined) {
+					c.clock == game.clock;
+				}
+			});
+			game.players[1].hand.forEach((c) => {
+				if (c.clock == undefined) {
+					c.clock == game.clock;
+				}
+			});
 			await games.set(`${channel.id}`, game);
 		} else {
 			return await channel.send("Sorry, you can't play that card here!");

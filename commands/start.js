@@ -58,11 +58,15 @@ module.exports = {
 		const starting_cards = game.cards;
 		game.on = true;
 		game.powerplay = false;
-		const player1 = `${game.players[0].name}`;
+		const player1 = `${game.players[game.table.current_turn].name}`;
 		game.table.cards.push(game.deck.pop());
 		game.players[0].hand = [];
 		game.players[1].hand = [];
 		for (let i = 0; i < starting_cards; i++) {
+			if (game.deck.length < 2) {
+				console.log(`Too many starting cards!`);
+				break;
+			}
 			game.players[0].hand.push(game.deck.pop());
 			game.players[1].hand.push(game.deck.pop());
 		}

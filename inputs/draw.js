@@ -62,6 +62,9 @@ module.exports = {
 			game.deck = shuffleArray(game.deck);
 		}
 		const draw_chunk = game.deck.splice(0, amount);
+		draw_chunk.forEach((c) => {
+			c.clock = game.clock;
+		});
 		game.players[current_turn].hand.push(...draw_chunk);
 		game.players[current_turn].stats.cards_drawn += amount;
 		game.table.current_turn++;
