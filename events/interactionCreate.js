@@ -11,10 +11,9 @@ module.exports = {
 			return;
 		}
 		console.log(`interaction created`);
+		console.log(`deferring reply`);
+		await interaction.deferReply({ ephemeral: true });
 		try {
-			console.log(`deferring reply`);
-			await interaction.deferReply({ ephemeral: true });
-
 			const { user, channel, customId } = interaction;
 			if (!interaction.isButton()) {
 				return;
