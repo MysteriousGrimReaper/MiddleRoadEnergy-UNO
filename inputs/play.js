@@ -32,11 +32,17 @@ const history_button = new ButtonBuilder()
 	.setStyle(ButtonStyle.Success)
 	.setLabel(`History`)
 	.setEmoji(`🔄`);
+const stats_button = new ButtonBuilder()
+	.setCustomId(`stats`)
+	.setStyle(ButtonStyle.Success)
+	.setLabel(`Stats`)
+	.setEmoji(`📊`);
 
 const button_row = new ActionRowBuilder().setComponents([
 	hand_button,
 	table_button,
 	history_button,
+	stats_button,
 ]);
 module.exports = {
 	name: `play`,
@@ -374,39 +380,49 @@ module.exports = {
 					.setDescription(`${scoreboard}`)
 					.addFields(
 						{
-							name: `Cards Played`,
+							name: `🎴 Cards Played`,
 							value: `${names[0]} - ${game.players[0].stats.cards_played}\n${names[1]} - ${game.players[1].stats.cards_played}`,
+							inline: true,
 						},
 						{
-							name: `WILDs Played`,
+							name: `🏁 WILDs Played`,
 							value: `${names[0]} - ${game.players[0].stats.wilds_played}\n${names[1]} - ${game.players[1].stats.wilds_played}`,
+							inline: true,
 						},
 						{
-							name: `Reverses Played`,
-							value: `${names[0]} - ${game.players[0].stats.reverses_played}\n${names[1]} - ${game.players[1].stats.reverses_played}`,
-						},
-						{
-							name: `Skips Played`,
-							value: `${names[0]} - ${game.players[0].stats.skips_played}\n${names[1]} - ${game.players[1].stats.skips_played}`,
-						},
-						{
-							name: `+2s Played`,
-							value: `${names[0]} - ${game.players[0].stats.plus_2s_played}\n${names[1]} - ${game.players[1].stats.plus_2s_played}`,
-						},
-						{
-							name: `WILD +4s Played`,
+							inline: true,
+							name: `⏭️ WILD +4s Played`,
 							value: `${names[0]} - ${game.players[0].stats.plus_4s_played}\n${names[1]} - ${game.players[1].stats.plus_4s_played}`,
 						},
 						{
-							name: `Times Switched Color`,
+							name: `🔃 Reverses Played`,
+							value: `${names[0]} - ${game.players[0].stats.reverses_played}\n${names[1]} - ${game.players[1].stats.reverses_played}`,
+							inline: true,
+						},
+						{
+							inline: true,
+							name: `🚫 Skips Played`,
+							value: `${names[0]} - ${game.players[0].stats.skips_played}\n${names[1]} - ${game.players[1].stats.skips_played}`,
+						},
+						{
+							inline: true,
+							name: `⏩ +2s Played`,
+							value: `${names[0]} - ${game.players[0].stats.plus_2s_played}\n${names[1]} - ${game.players[1].stats.plus_2s_played}`,
+						},
+
+						{
+							inline: true,
+							name: `♻️ Times Switched Color`,
 							value: `${names[0]} - ${game.players[0].stats.times_switched_color}\n${names[1]} - ${game.players[1].stats.times_switched_color}`,
 						},
 						{
-							name: `Cards Drawn`,
+							inline: true,
+							name: `🫳 Cards Drawn`,
 							value: `${names[0]} - ${game.players[0].stats.cards_drawn}\n${names[1]} - ${game.players[1].stats.cards_drawn}`,
 						},
 						{
-							name: `Longest Card Chain`,
+							inline: true,
+							name: `⛓️ Longest Card Chain`,
 							value: `${names[0]} - ${game.players[0].stats.longest_chain}\n${names[1]} - ${game.players[1].stats.longest_chain}`,
 						}
 					)

@@ -30,11 +30,17 @@ const history_button = new ButtonBuilder()
 	.setStyle(ButtonStyle.Success)
 	.setLabel(`History`)
 	.setEmoji(`🔄`);
+const stats_button = new ButtonBuilder()
+	.setCustomId(`stats`)
+	.setStyle(ButtonStyle.Success)
+	.setLabel(`Stats`)
+	.setEmoji(`📊`);
 
 const button_row = new ActionRowBuilder().setComponents([
 	hand_button,
 	table_button,
 	history_button,
+	stats_button,
 ]);
 module.exports = {
 	name: `powerplay`,

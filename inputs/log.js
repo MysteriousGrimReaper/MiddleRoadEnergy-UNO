@@ -22,7 +22,7 @@ module.exports = {
 		const total_time = log
 			.map((l) => l.end - l.start)
 			.reduce((acc, cv) => acc + cv, 0);
-		const log_text =
+		let log_text =
 			log.reduce(
 				(acc, cv) =>
 					acc +
@@ -36,6 +36,13 @@ module.exports = {
 			`\n**Total Time: ${Math.floor(total_time / 1000 / 60)}m ${
 				Math.floor(total_time / 1000) % 60
 			}s**`;
+		if (game.on) {
+			const current_time = Date.now();
+			const t_diff = current_time - game.log[game.log.length - 1].start;
+			log_text += `\n\nCurrent game has lasted **${Math.floor(
+				t_diff / 1000 / 60
+			)}m ${Math.floor(t_diff / 1000) % 60}s**.`;
+		}
 		return await channel.send(log_text);
 	},
 };

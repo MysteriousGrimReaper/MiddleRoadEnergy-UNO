@@ -163,6 +163,7 @@ module.exports = {
 							});
 						}
 					}
+					break;
 				case `table`:
 					try {
 						if (!can_view_table) {
@@ -208,6 +209,7 @@ module.exports = {
 							content: `An error has occurred!`,
 						});
 					}
+					break;
 				case `history`:
 					if (!can_view_history) {
 						return await interaction.editReply({
@@ -215,9 +217,7 @@ module.exports = {
 							content: `Sorry, you can't view the history!`,
 						});
 					}
-					const cards_played =
-						game.players[0].stats.cards_played +
-						game.players[1].stats.cards_played;
+					const cards_played = game.table.cards.length;
 					const card_chart = game.table.cards.reduce(
 						(acc, cv) => {
 							if (cv.wild) {
@@ -257,7 +257,7 @@ module.exports = {
 
 					const history_embed = new EmbedBuilder()
 						.setTitle(
-							`${cards_played} cards have been played so far. Card history is as follows:`
+							`${cards_played} cards have been played since the last shuffle. Card history is as follows:`
 						)
 						.setDescription(chart_text)
 						.setColor(parseInt(embed_colors[top_card.color], 16))
@@ -274,6 +274,64 @@ module.exports = {
 						ephemeral: true,
 						embeds: [history_embed],
 					});
+					break;
+				case `stats`:
+					const names = players.map((p) => p.name);
+					const stats_embed = new EmbedBuilder()
+						.addFields(
+							{
+								name: `🎴 Cards Played`,
+								value: `${names[0]} - ${game.players[0].stats.cards_played}\n${names[1]} - ${game.players[1].stats.cards_played}`,
+								inline: true,
+							},
+							{
+								name: `🏁 WILDs Played`,
+								value: `${names[0]} - ${game.players[0].stats.wilds_played}\n${names[1]} - ${game.players[1].stats.wilds_played}`,
+								inline: true,
+							},
+							{
+								inline: true,
+								name: `⏭️ WILD +4s Played`,
+								value: `${names[0]} - ${game.players[0].stats.plus_4s_played}\n${names[1]} - ${game.players[1].stats.plus_4s_played}`,
+							},
+							{
+								name: `🔃 Reverses Played`,
+								value: `${names[0]} - ${game.players[0].stats.reverses_played}\n${names[1]} - ${game.players[1].stats.reverses_played}`,
+								inline: true,
+							},
+							{
+								inline: true,
+								name: `🚫 Skips Played`,
+								value: `${names[0]} - ${game.players[0].stats.skips_played}\n${names[1]} - ${game.players[1].stats.skips_played}`,
+							},
+							{
+								inline: true,
+								name: `⏩ +2s Played`,
+								value: `${names[0]} - ${game.players[0].stats.plus_2s_played}\n${names[1]} - ${game.players[1].stats.plus_2s_played}`,
+							},
+
+							{
+								inline: true,
+								name: `♻️ Times Switched Color`,
+								value: `${names[0]} - ${game.players[0].stats.times_switched_color}\n${names[1]} - ${game.players[1].stats.times_switched_color}`,
+							},
+							{
+								inline: true,
+								name: `🫳 Cards Drawn`,
+								value: `${names[0]} - ${game.players[0].stats.cards_drawn}\n${names[1]} - ${game.players[1].stats.cards_drawn}`,
+							},
+							{
+								inline: true,
+								name: `⛓️ Longest Card Chain`,
+								value: `${names[0]} - ${game.players[0].stats.longest_chain}\n${names[1]} - ${game.players[1].stats.longest_chain}`,
+							}
+						)
+						.setColor(parseInt(embed_colors[top_card.color], 16));
+					return await interaction.editReply({
+						ephemeral: true,
+						embeds: [stats_embed],
+					});
+					break;
 			}
 		} catch (error) {
 			console.log(error);
