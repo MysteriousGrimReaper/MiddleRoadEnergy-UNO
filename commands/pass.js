@@ -1,5 +1,12 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
+function shuffleArray(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]]; // Swap elements
+	}
+	return array;
+}
 const {
 	EmbedBuilder,
 	ButtonBuilder,
@@ -68,12 +75,12 @@ module.exports = {
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 					top_card.color
 				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 			)
 			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 			});
 		await channel.send({ embeds: [play_embed], components: [button_row] });
@@ -102,12 +109,12 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 				});
 			game.powerplay = undefined;

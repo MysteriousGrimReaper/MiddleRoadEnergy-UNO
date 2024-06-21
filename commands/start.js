@@ -80,7 +80,6 @@ module.exports = {
 			cards: starting_cards,
 		});
 		const top_card = game.table.cards[game.table.cards.length - 1];
-		console.log();
 		const play_embed = new EmbedBuilder()
 			.setDescription(
 				`Starting UNO game with ${starting_cards} cards! The currently flipped card is:\n**${
@@ -89,12 +88,12 @@ module.exports = {
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 					top_card.wild ? `` : top_card.color
 				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 			)
 			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 			});
 		await channel.send({

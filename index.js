@@ -69,22 +69,25 @@ const uno_message_listener = async (message) => {
 	}
 	const { channel, guildId } = message;
 	const game = await games.get(channel.id);
-	const setting = await settings.get(guildId);
 	if (!game) {
 		client.on("messageCreate", uno_message_listener);
 		return await message.reply(
 			`There's no game going on in this channel right now! Wait for a referee to start one.`
 		);
 	}
+	if (!game.command_list) {
+		game.command_list = [];
+	}
 	console.log(game);
 	const commands = content.split(`&&`);
-	if (setting.max_command_chain > 0) {
-		commands.splice(setting.max_command_chain);
+	if (game.settings.max_command_chain > 0) {
+		commands.splice(game?.settings?.max_command_chain);
 	}
 	for (c of commands) {
 		const a = c.trim().split(` `);
 		for (ci of command_inputs) {
 			const { names, execute, input } = ci;
+			console.log(ci);
 			if (
 				names.reduce(
 					(acc, cv) =>

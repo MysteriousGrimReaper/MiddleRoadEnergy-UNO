@@ -12,7 +12,13 @@ module.exports = {
 		}
 		console.log(`interaction created`);
 		console.log(`deferring reply`);
-		await interaction.deferReply({ ephemeral: true });
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch {
+			console.log(`The interaction thing failed again....`);
+			return;
+		}
+		console.log(`reply deferred`);
 		try {
 			const { user, channel, customId } = interaction;
 			if (!interaction.isButton()) {
@@ -30,9 +36,19 @@ module.exports = {
 			const { current_turn, cards } = table;
 			const top_card = cards[cards.length - 1];
 			const author = user;
+			const is_ref = interaction.member.permissions.has(
+				PermissionsBitField.Flags.ManageGuild
+			);
+			const is_player = game.players.map((p) => p.id).includes(user.id);
+			const can_view_table =
+				is_ref || is_player || game.settings.viewers_see_table;
+			const can_view_history =
+				is_ref ||
+				(is_player && game?.settings?.players_see_history) ||
+				game.settings.viewers_see_history;
 			switch (customId) {
 				case `hand`:
-					if (!game.players.map((p) => p.id).includes(user.id)) {
+					if (!is_player) {
 						return await interaction.editReply({
 							ephemeral: true,
 							content: `You're not in the game!`,
@@ -40,21 +56,36 @@ module.exports = {
 					} else {
 						try {
 							const order = [`R`, `G`, `Y`, `B`, `WILD`];
+							const icon_order = [
+								`0`,
+								`1`,
+								`2`,
+								`3`,
+								`4`,
+								`5`,
+								`6`,
+								`7`,
+								`8`,
+								`9`,
+								`REVERSE`,
+								`SKIP`,
+								`+2`,
+								`+4`,
+							];
 							const player = players.find(
 								(p) => p.id == author.id
 							);
-							const max_clock = player.hand.reduce(
-								(acc, cv) => (acc > cv.clock ? acc : cv.clock),
-								0
-							);
-							const italicize = (value) =>
-								value.clock == max_clock &&
-								game.clock != 0 &&
-								false;
+							const italicize = (card) => {
+								console.log(!card.has_seen);
+								return !card.has_seen;
+							};
 							const player_hand_a = player.hand.toSorted(
 								(a, b) =>
 									order.indexOf(a.color) -
-									order.indexOf(b.color)
+									order.indexOf(b.color) +
+									0.001 *
+										(icon_order.indexOf(a.icon) -
+											icon_order.indexOf(b.icon))
 							);
 							const player_hand = player_hand_a.reduce(
 								(acc, cv, index) =>
@@ -64,7 +95,7 @@ module.exports = {
 										player_hand_a[index - 1]?.color
 											? `\n- `
 											: ` | `
-									}${italicize(cv) ? `*` : ``}${
+									}${italicize(cv) ? `__` : ``}${
 										cv.wild ||
 										cv.color == top_card.color ||
 										cv.icon == top_card.icon
@@ -78,7 +109,7 @@ module.exports = {
 										cv.icon == top_card.icon
 											? `**`
 											: ``
-									}${italicize(cv) ? `*` : ``}`,
+									}${italicize(cv) ? `__` : ``}`,
 								``
 							);
 							const hand_embed = new EmbedBuilder()
@@ -112,10 +143,19 @@ module.exports = {
 										].icon
 									}`,
 								});
-							return await interaction.editReply({
+							const p_index = players.indexOf(player);
+							game.players[p_index].hand.forEach(
+								(card) => (card.has_seen = true)
+							);
+							await interaction.editReply({
 								ephemeral: true,
 								embeds: [hand_embed],
 							});
+
+							return await games.set(
+								interaction.channel.id,
+								game
+							);
 						} catch (error) {
 							return await interaction.editReply({
 								ephemeral: true,
@@ -125,6 +165,11 @@ module.exports = {
 					}
 				case `table`:
 					try {
+						if (!can_view_table) {
+							return await interaction.editReply({
+								content: `Sorry, you can't view the table!`,
+							});
+						}
 						const table_embed = new EmbedBuilder()
 							.setDescription(
 								`It's currently ${
@@ -143,14 +188,14 @@ module.exports = {
 								parseInt(embed_colors[top_card.color], 16)
 							)
 							.setThumbnail(
-								`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+								`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 									top_card.color
 								}${top_card.wild ? `WILD` : ``}${
 									top_card.icon
 								}.png`
 							)
 							.setFooter({
-								iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+								iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 								text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 							});
 						return await interaction.editReply({
@@ -164,17 +209,10 @@ module.exports = {
 						});
 					}
 				case `history`:
-					if (
-						!game.players
-							.map((p) => p.id)
-							.includes(interaction.user.id) &&
-						!interaction.member.permissions.has(
-							PermissionsBitField.Flags.ManageGuild
-						)
-					) {
+					if (!can_view_history) {
 						return await interaction.editReply({
 							ephemeral: true,
-							content: `You can't view the history, you're not a player!`,
+							content: `Sorry, you can't view the history!`,
 						});
 					}
 					const cards_played =
@@ -182,7 +220,6 @@ module.exports = {
 						game.players[1].stats.cards_played;
 					const card_chart = game.table.cards.reduce(
 						(acc, cv) => {
-							console.log(acc);
 							if (cv.wild) {
 								acc["WILD"].push(cv);
 							} else {
@@ -192,7 +229,6 @@ module.exports = {
 						},
 						{ R: [], G: [], Y: [], B: [], WILD: [] }
 					);
-					console.log(card_chart);
 					const chart_text = `Red: ${card_chart.R.sort().join(
 						`, `
 					)}\nGreen: ${card_chart.G.sort().join(
@@ -226,12 +262,12 @@ module.exports = {
 						.setDescription(chart_text)
 						.setColor(parseInt(embed_colors[top_card.color], 16))
 						.setThumbnail(
-							`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+							`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 								top_card.color
 							}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 						)
 						.setFooter({
-							iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+							iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 							text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 						});
 					return await interaction.editReply({

@@ -28,7 +28,7 @@ module.exports = {
 			.setDescription(player_hand.join(`\n`))
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 					top_card.color
 				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 			)

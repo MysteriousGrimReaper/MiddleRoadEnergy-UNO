@@ -1,6 +1,13 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
 const { base } = require("../deck.json");
+function shuffleArray(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]]; // Swap elements
+	}
+	return array;
+}
 const {
 	EmbedBuilder,
 	ButtonBuilder,
@@ -131,7 +138,7 @@ module.exports = {
 				if (
 					!color &&
 					(wild.includes(icon.toUpperCase()) ||
-						alias[icon.toUpperCase()])
+						wild.includes(alias[icon.toUpperCase()]))
 				) {
 					await games.set(`${channel.id}.processing`, true);
 					let first = true;
@@ -221,6 +228,103 @@ module.exports = {
 			);
 			game.players[current_turn].stats.cards_played++;
 			game.players[current_turn].uno = false;
+
+			let extra = "";
+			// stats switch
+			switch (card.icon) {
+				case "REVERSE":
+					game.players[current_turn].stats.reverses_played++;
+					break;
+				case "SKIP":
+					game.players[current_turn].stats.skips_played++;
+					break;
+				case "+2":
+					game.players[current_turn].stats.plus_2s_played++;
+					break;
+				case "+4": {
+					// let player = game.queue.shift();
+					game.players[current_turn].stats.plus_4s_played++;
+				}
+			}
+			switch (card.icon) {
+				case "REVERSE":
+				case "SKIP":
+					game.table.current_turn++;
+					game.table.current_turn %= 2;
+					extra = `Sorry, ${
+						game.players[game.table.current_turn].name
+					}! Skip a turn! `;
+					break;
+				case "+2":
+					let amount = 0;
+					for (let i = table.cards.length - 1; i >= 0; i--) {
+						if (table.cards[i].icon === "+2") {
+							amount += 2;
+						} else {
+							break;
+						}
+					}
+					if (game.deck.length < amount) {
+						await channel.send(`*Reshuffling the deck...*`);
+						while (table.cards.length > 1) {
+							game.deck.push(game.table.cards.shift());
+						}
+						game.deck = shuffleArray(game.deck);
+					}
+					const draw_chunk = game.deck.splice(0, amount);
+					game.players[1 - current_turn].hand.push(...draw_chunk);
+					game.players[1 - current_turn].stats.cards_drawn += amount;
+					extra = `${
+						game.players[1 - current_turn].name
+					} picks up ${amount} cards! Tough break. `;
+					extra += " Also, skip a turn!";
+					game.table.current_turn++;
+					game.table.current_turn %= 2;
+					break;
+				case "WILD":
+					extra = `In case you missed it, the current color is now **${
+						display_names[
+							game.table.cards[game.table.cards.length - 1]
+						]
+					}**! `;
+					break;
+				case "+4": {
+					// let player = game.queue.shift();
+					const amount = 4;
+					if (game.deck.length < amount) {
+						await channel.send(`*Reshuffling the deck...*`);
+						while (table.cards.length > 1) {
+							game.deck.push(game.table.cards.shift());
+						}
+						game.deck = shuffleArray(game.deck);
+					}
+					const draw_chunk = game.deck.splice(0, amount);
+					game.players[1 - current_turn].hand.push(...draw_chunk);
+					game.players[1 - current_turn].stats.cards_drawn += amount;
+					extra = `${
+						game.players[1 - current_turn].name
+					} picks up 4! The current color is now **${
+						display_names[
+							game.table.cards[game.table.cards.length - 1].color
+						]
+					}**! `;
+					extra += " Also, skip a turn!";
+					game.table.current_turn++;
+					game.table.current_turn %= 2;
+					break;
+				}
+			}
+			if (card.wild && card.icon != `+4`) {
+				game.players[current_turn].stats.wilds_played++;
+			}
+			game.table.current_turn++;
+			game.table.current_turn %= 2;
+			console.log(game.table.current_turn);
+			top_card = game.table.cards[game.table.cards.length - 1];
+			game.history.push({
+				player: game.players[current_turn].name,
+				top_card,
+			});
 			if (game.players[current_turn].hand.length === 0) {
 				await channel.send(
 					`Good game! ${game.players[current_turn].name} has won!`
@@ -236,25 +340,14 @@ module.exports = {
 				while (game.table.cards.length > 0) {
 					game.deck.push(game.table.cards.pop());
 				}
-				function shuffleArray(array) {
-					for (let i = array.length - 1; i > 0; i--) {
-						const j = Math.floor(Math.random() * (i + 1));
-						[array[i], array[j]] = [array[j], array[i]]; // Swap elements
-					}
-					return array;
-				}
 				game.deck = shuffleArray(base);
 				game.on = false;
 				game.log[game.matches_finished].end = Date.now();
 				game.log[game.matches_finished].winner = current_turn;
 				game.matches_finished++;
-				if (game.matches_finished < Math.ceil(game.bestof / 2) / 2) {
-					game.table.current_turn = 0;
-				} else if (game.matches_finished < Math.ceil(game.bestof / 2)) {
-					game.table.current_turn = 1;
-				} else {
-					game.table.current_turn = game.matches_finished % 2;
-				}
+				game.table.current_turn =
+					game.turn_indicator[game.matches_finished];
+
 				const status =
 					game.players[0].wins > game.players[1].wins
 						? 1
@@ -311,112 +404,32 @@ module.exports = {
 						{
 							name: `Cards Drawn`,
 							value: `${names[0]} - ${game.players[0].stats.cards_drawn}\n${names[1]} - ${game.players[1].stats.cards_drawn}`,
+						},
+						{
+							name: `Longest Card Chain`,
+							value: `${names[0]} - ${game.players[0].stats.longest_chain}\n${names[1]} - ${game.players[1].stats.longest_chain}`,
 						}
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(users[current_turn].avatarURL())
 					.setFooter({
-						text:
-							game.matches_finished == game.bestof
-								? `Congratulations, ${
-										status > 0 ? names[0] : names[1]
-								  }!`
-								: `${
-										players[game.table.current_turn].name
-								  } starts the next match! Referee, make sure to use ref cards <number> to set the card count before the match starts.`,
-						iconURL:
-							game.matches_finished == game.bestof
-								? status > 0
-									? users[0].avatarURL()
-									: users[1].avatarURL()
-								: users[game.table.current_turn].avatarURL(),
+						text: match_is_finished
+							? `Congratulations, ${
+									status > 0 ? names[0] : names[1]
+							  }!`
+							: `${
+									players[game.table.current_turn].name
+							  } starts the next match! Referee, make sure to use ref cards <number> to set the card count before the match starts.`,
+						iconURL: match_is_finished
+							? status > 0
+								? users[0].avatarURL()
+								: users[1].avatarURL()
+							: users[game.table.current_turn].avatarURL(),
 					});
 
 				await channel.send({ embeds: [stats_embed] });
 				return await games.set(`${channel.id}`, game);
 			}
-
-			let extra = "";
-			// stats switch
-			switch (card.icon) {
-				case "REVERSE":
-					game.players[current_turn].stats.reverses_played++;
-				case "SKIP":
-					game.players[current_turn].stats.skips_played++;
-					game.table.current_turn++;
-					game.table.current_turn %= 2;
-					extra = `Sorry, ${
-						game.players[game.table.current_turn].name
-					}! Skip a turn! `;
-					break;
-				case "+2":
-					game.players[current_turn].stats.plus_2s_played++;
-					let amount = 0;
-					for (let i = table.cards.length - 1; i >= 0; i--) {
-						if (table.cards[i].icon === "+2") {
-							amount += 2;
-						} else {
-							break;
-						}
-					}
-					if (game.deck.length < amount) {
-						await channel.send(`*Reshuffling the deck...*`);
-						while (table.cards.length > 1) {
-							game.deck.push(game.table.cards.shift());
-						}
-						game.deck = shuffleArray(game.deck);
-					}
-					const draw_chunk = game.deck.splice(0, amount);
-					game.players[1 - current_turn].hand.push(...draw_chunk);
-					game.players[1 - current_turn].stats.cards_drawn += amount;
-					extra = `${
-						game.players[1 - current_turn].name
-					} picks up ${amount} cards! Tough break. `;
-					extra += " Also, skip a turn!";
-					game.table.current_turn++;
-					game.table.current_turn %= 2;
-					break;
-				case "WILD":
-					extra = `In case you missed it, the current color is now **${
-						display_names[
-							game.table.cards[game.table.cards.length - 1]
-						]
-					}**! `;
-					break;
-				case "+4": {
-					// let player = game.queue.shift();
-					game.players[current_turn].stats.plus_4s_played++;
-					const amount = 4;
-					if (game.deck.length < amount) {
-						await channel.send(`*Reshuffling the deck...*`);
-						while (table.cards.length > 1) {
-							game.deck.push(game.table.cards.shift());
-						}
-						game.deck = shuffleArray(game.deck);
-					}
-					const draw_chunk = game.deck.splice(0, amount);
-					game.players[1 - current_turn].hand.push(...draw_chunk);
-					game.players[1 - current_turn].stats.cards_drawn += amount;
-					extra = `${
-						game.players[1 - current_turn].name
-					} picks up 4! The current color is now **${
-						display_names[
-							game.table.cards[game.table.cards.length - 1].color
-						]
-					}**! `;
-					extra += " Also, skip a turn!";
-					game.table.current_turn++;
-					game.table.current_turn %= 2;
-					break;
-				}
-			}
-			if (card.wild && card.icon != `+4`) {
-				game.players[current_turn].stats.wilds_played++;
-			}
-			game.table.current_turn++;
-			game.table.current_turn %= 2;
-			console.log(game.table.current_turn);
-			top_card = game.table.cards[game.table.cards.length - 1];
 			const play_embed = new EmbedBuilder()
 				.setDescription(
 					`A **${display_names[top_card.color]} ${
@@ -429,12 +442,12 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 				});
 			await channel.send({
@@ -466,12 +479,12 @@ module.exports = {
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(
-						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 							top_card.color
 						}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 					)
 					.setFooter({
-						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 						text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 					});
 				game.powerplay = undefined;
@@ -486,20 +499,18 @@ module.exports = {
 					`**UNO!!** ${game.players[current_turn].name} only has 1 card left!`
 				);
 			}
-			if (game.clock == undefined) {
-				game.clock = 0;
+			if (game.table.current_turn == current_turn) {
+				game.players[current_turn].chain++;
+			} else {
+				game.players[current_turn].chain = 0;
 			}
-			game.clock++;
-			game.players[0].hand.forEach((c) => {
-				if (c.clock == undefined) {
-					c.clock == game.clock;
-				}
-			});
-			game.players[1].hand.forEach((c) => {
-				if (c.clock == undefined) {
-					c.clock == game.clock;
-				}
-			});
+			if (
+				game.players[current_turn].stats.longest_chain <=
+				game.players[current_turn].chain + 1
+			) {
+				game.players[current_turn].stats.longest_chain =
+					game.players[current_turn].chain + 1;
+			}
 			await games.set(`${channel.id}`, game);
 		} else {
 			return await channel.send("Sorry, you can't play that card here!");

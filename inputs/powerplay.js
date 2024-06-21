@@ -6,6 +6,13 @@ const {
 	ButtonStyle,
 	ActionRowBuilder,
 } = require("discord.js");
+function shuffleArray(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]]; // Swap elements
+	}
+	return array;
+}
 const db = new QuickDB();
 const games = db.table("games");
 const hand_button = new ButtonBuilder()
@@ -91,12 +98,12 @@ module.exports = {
 					)
 				)
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
 					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 				});
 			await channel.send({

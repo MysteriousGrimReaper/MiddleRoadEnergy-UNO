@@ -3,6 +3,13 @@ const { display_names, embed_colors } = require("../enums.json");
 const { EmbedBuilder } = require("discord.js");
 const db = new QuickDB();
 const games = db.table("games");
+function shuffleArray(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]]; // Swap elements
+	}
+	return array;
+}
 module.exports = {
 	name: `callout`,
 	aliases: [`c`],

@@ -2,6 +2,7 @@ const { QuickDB } = require("quick.db");
 const { base, oops_all_wild } = require("../deck.json");
 const db = new QuickDB();
 const games = db.table("games");
+const setting = db.table("settings");
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -15,10 +16,45 @@ module.exports = {
 	aliases: [`init`, `i`],
 	description: `Initialize a match between two players by pinging them. This should only be run once at the start of a game set.`,
 	async execute(message) {
+		let settings = await setting.get(message.guildId);
+		if (!settings) {
+			settings = {
+				max_command_chain: 0,
+				viewers_see_history: false,
+				viewers_see_table: true,
+				players_see_history: true,
+				custom_cards: true,
+			};
+		}
+		const stats = {
+			cards_played: 0,
+			plus_4s_played: 0,
+			times_switched_color: 0,
+			cards_drawn: 0,
+			plus_2s_played: 0,
+			wilds_played: 0,
+			reverses_played: 0,
+			skips_played: 0,
+			longest_chain: 0,
+			chain: 0,
+		};
 		const no_pp = message.content.includes(`0pp`);
 		const channel = message?.mentions?.channels?.first() ?? message.channel;
 		const first_player = message?.mentions?.members?.at(0);
 		const second_player = message?.mentions?.members?.at(1);
+		function isValidTurnIndicator(turnIndicator) {
+			const pattern = /^(\d+-)*\d+$/;
+			return pattern.test(turnIndicator);
+		}
+		const args = message.content.split(` `);
+		const turn_i = args.find((a) => isValidTurnIndicator(a));
+		let turn_indicator = [0, 0, 1, 1, 0, 1, 0];
+		if (turn_i) {
+			turn_indicator = turn_i.split(`-`).reduce((acc, cv, index) => {
+				acc.push(...Array(parseInt(cv)).fill(index % 2));
+				return acc;
+			}, []);
+		}
 
 		if (await games.get(`${channel.id}`)) {
 			await message.reply(
@@ -49,11 +85,13 @@ module.exports = {
 			bestof: 7,
 			cards: 7,
 			clock: 0,
+			turn_indicator,
 			table: {
 				cards: [],
 				current_turn: 0,
 			},
 			deck: shuffleArray(base), // SWITCH THIS BACK TO base
+			settings,
 			players: [
 				{
 					name: first_name,
@@ -62,16 +100,7 @@ module.exports = {
 					pp: no_pp ? 0 : 1,
 					wins: 0,
 					points: 0,
-					stats: {
-						cards_played: 0,
-						plus_4s_played: 0,
-						times_switched_color: 0,
-						cards_drawn: 0,
-						plus_2s_played: 0,
-						wilds_played: 0,
-						reverses_played: 0,
-						skips_played: 0,
-					},
+					stats,
 				},
 				{
 					name: second_name,
@@ -80,20 +109,12 @@ module.exports = {
 					pp: no_pp ? 0 : 1,
 					wins: 0,
 					points: 0,
-					stats: {
-						cards_played: 0,
-						plus_4s_played: 0,
-						times_switched_color: 0,
-						cards_drawn: 0,
-						plus_2s_played: 0,
-						wilds_played: 0,
-						reverses_played: 0,
-						skips_played: 0,
-					},
+					stats,
 				},
 			],
 			matches_finished: 0,
 			log: [],
+			history: [],
 		};
 		await games.set(`${channel.id}`, game);
 		await message.reply(

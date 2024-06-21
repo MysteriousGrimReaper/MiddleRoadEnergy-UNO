@@ -28,12 +28,12 @@ module.exports = {
 					acc +
 					`**Game ${log.indexOf(cv) + 1} - ${
 						players[cv.winner].name
-					} - ${cv.cards} cards - ${
-						Math.floor((cv.end - cv.start) / 1000 / 60) % 60
-					}m ${Math.floor((cv.end - cv.start) / 1000) % 60}s**\n`,
+					} - ${cv.cards} cards - ${Math.floor(
+						(cv.end - cv.start) / 1000 / 60
+					)}m ${Math.floor((cv.end - cv.start) / 1000) % 60}s**\n`,
 				``
 			) +
-			`\n**Total Time: ${Math.floor(total_time / 1000 / 60) % 60}m ${
+			`\n**Total Time: ${Math.floor(total_time / 1000 / 60)}m ${
 				Math.floor(total_time / 1000) % 60
 			}s**`;
 		return await channel.send(log_text);
