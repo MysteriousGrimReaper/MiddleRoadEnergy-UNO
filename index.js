@@ -2,6 +2,18 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { QuickDB } = require("quick.db");
 
+class GameCache {
+	constructor() {}
+	getGame(id) {
+		return this[id];
+	}
+	setGame(id, game) {
+		this[id] = game;
+		return this;
+	}
+}
+const game_cache = new GameCache();
+module.exports = game_cache;
 const db = new QuickDB();
 const games = db.table("games");
 const settings = db.table("settings");
@@ -60,7 +72,7 @@ for (const file of inputFiles) {
 }
 const uno_message_listener = async (message) => {
 	client.off("messageCreate", uno_message_listener);
-	console.log(message);
+	console.log(message.id);
 	let { content } = message;
 	content = content.toLowerCase();
 	if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
@@ -78,7 +90,7 @@ const uno_message_listener = async (message) => {
 	if (!game.command_list) {
 		game.command_list = [];
 	}
-	console.log(game);
+	// console.log(game);
 	const commands = content.split(`&&`);
 	if (game.settings.max_command_chain > 0) {
 		commands.splice(game?.settings?.max_command_chain);
@@ -87,7 +99,7 @@ const uno_message_listener = async (message) => {
 		const a = c.trim().split(` `);
 		for (ci of command_inputs) {
 			const { names, execute, input } = ci;
-			console.log(ci);
+			// console.log(ci);
 			if (
 				names.reduce(
 					(acc, cv) =>
@@ -147,7 +159,12 @@ for (const file of commandFiles) {
 		}
 	});
 }
-
+async function cacheInitialize() {
+	(await games.all()).forEach((g) => {
+		game_cache.setGame(g.id, g.value);
+	});
+}
+cacheInitialize();
 client.login(test ? testToken : token);
 /*
 const yourUserId = "1014413186017021952";

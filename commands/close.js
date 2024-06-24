@@ -10,6 +10,6 @@ module.exports = {
 		const channel = message?.mentions?.channels?.first() ?? message.channel;
 		const game = await games.delete(channel.id);
 		await message.reply(`Match in ${channel} closed.`);
-		console.log(game);
+		// console.log(game);
 	},
 };

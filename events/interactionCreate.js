@@ -3,19 +3,22 @@ const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 const games = db.table("games");
 const { display_names, embed_colors } = require("../enums.json");
-const hand = require("../inputs/hand");
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		if (!interaction?.isButton()) {
 			return;
 		}
+		const game_cache = require("../index");
 		console.log(`interaction created`);
-		console.log(`deferring reply`);
+
 		try {
+			console.log(`deferring reply`);
 			await interaction.deferReply({ ephemeral: true });
-		} catch {
+		} catch (error) {
 			console.log(`The interaction thing failed again....`);
+			console.log(error);
+			console.log(interaction);
 			return;
 		}
 		console.log(`reply deferred`);
@@ -25,14 +28,22 @@ module.exports = {
 				return;
 			}
 			console.log(`getting game`);
-			const game = await games.get(channel.id);
+			const game =
+				game_cache.getGame(channel.id) ?? (await games.get(channel.id));
+			console.log(`game gotten`);
 			if (!game) {
 				return await interaction.editReply({
 					ephemeral: true,
 					content: `There's no game happening in this channel!`,
 				});
 			}
-			const { players, table } = game;
+			const { players, table, on } = game;
+			if (!on) {
+				return await interaction.editReply({
+					ephemeral: true,
+					content: `There's no active game currently in this channel!`,
+				});
+			}
 			const { current_turn, cards } = table;
 			const top_card = cards[cards.length - 1];
 			const author = user;
@@ -76,8 +87,9 @@ module.exports = {
 								(p) => p.id == author.id
 							);
 							const italicize = (card) => {
-								console.log(!card.has_seen);
-								return !card.has_seen;
+								// console.log(!card.has_seen);
+								// return !card.has_seen;
+								return false;
 							};
 							const player_hand_a = player.hand.toSorted(
 								(a, b) =>
@@ -144,18 +156,27 @@ module.exports = {
 									}`,
 								});
 							const p_index = players.indexOf(player);
-							game.players[p_index].hand.forEach(
-								(card) => (card.has_seen = true)
-							);
+
 							await interaction.editReply({
 								ephemeral: true,
 								embeds: [hand_embed],
 							});
-
-							return await games.set(
-								interaction.channel.id,
-								game
-							);
+							/*
+							for (
+								let index = 0;
+								index < game.players[p_index].hand.length;
+								index++
+							) {
+								try {
+									await games.set(
+										`${interaction.channel.id}.players[${p_index}].hand[${index}].has_seen`,
+										true
+									);
+								} catch {
+									continue;
+								}
+							}
+								*/
 						} catch (error) {
 							return await interaction.editReply({
 								ephemeral: true,

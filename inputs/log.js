@@ -1,5 +1,4 @@
 const { QuickDB } = require("quick.db");
-const { base } = require("../deck.json");
 const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
@@ -22,6 +21,7 @@ module.exports = {
 		const total_time = log
 			.map((l) => l.end - l.start)
 			.reduce((acc, cv) => acc + cv, 0);
+		const avg_time = total_time / log.length;
 		let log_text =
 			log.reduce(
 				(acc, cv) =>
@@ -35,7 +35,9 @@ module.exports = {
 			) +
 			`\n**Total Time: ${Math.floor(total_time / 1000 / 60)}m ${
 				Math.floor(total_time / 1000) % 60
-			}s**`;
+			}s**\n**Average Time: ${Math.floor(avg_time / 1000 / 60)}m ${
+				Math.floor(avg_time / 1000) % 60
+			}**`;
 		if (game.on) {
 			const current_time = Date.now();
 			const t_diff = current_time - game.log[game.log.length - 1].start;

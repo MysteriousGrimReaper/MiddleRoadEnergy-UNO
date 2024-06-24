@@ -24,6 +24,8 @@ module.exports = {
 		await channel.send(
 			`**UNO!!** ${players[player].name} only has 1 card left!`
 		);
+		const game_cache = require("../index");
+		game_cache.setGame(channel.id, game);
 		await games.set(channel.id, game);
 	},
 };

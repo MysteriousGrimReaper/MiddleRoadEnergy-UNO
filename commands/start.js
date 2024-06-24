@@ -107,6 +107,8 @@ module.exports = {
 			components: [button_row],
 		});
 
+		const game_cache = require("../index");
+		game_cache.setGame(channel.id, game);
 		await games.set(`${channel.id}`, game);
 	},
 };

@@ -1,6 +1,6 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
-const { base } = require("../deck.json");
+const { base, large } = require("../deck.json");
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -37,7 +37,6 @@ const stats_button = new ButtonBuilder()
 	.setStyle(ButtonStyle.Success)
 	.setLabel(`Stats`)
 	.setEmoji(`📊`);
-
 const button_row = new ActionRowBuilder().setComponents([
 	hand_button,
 	table_button,
@@ -372,8 +371,8 @@ module.exports = {
 					game.matches_finished == game.bestof;
 				const final_embed_title = match_is_finished
 					? status > 0
-						? `${names[0]} HAS WON THE MATCH! (${game.players[0].wins}-${game.players[1].wins})`
-						: `${names[1]} HAS WON THE MATCH! (${game.players[1].wins}-${game.players[0].wins})`
+						? `${names[0]} HAS WON THE SERIES! (${game.players[0].wins}-${game.players[1].wins})`
+						: `${names[1]} HAS WON THE SERIES! (${game.players[1].wins}-${game.players[0].wins})`
 					: `Current Match Statistics`;
 				const stats_embed = new EmbedBuilder()
 					.setTitle(final_embed_title)
@@ -444,6 +443,8 @@ module.exports = {
 					});
 
 				await channel.send({ embeds: [stats_embed] });
+				const game_cache = require("../index");
+				game_cache.setGame(channel.id, game);
 				return await games.set(`${channel.id}`, game);
 			}
 			const play_embed = new EmbedBuilder()
@@ -527,7 +528,9 @@ module.exports = {
 				game.players[current_turn].stats.longest_chain =
 					game.players[current_turn].chain + 1;
 			}
-			await games.set(`${channel.id}`, game);
+			const game_cache = require("../index");
+			game_cache.setGame(channel.id, game);
+			return await games.set(`${channel.id}`, game);
 		} else {
 			return await channel.send("Sorry, you can't play that card here!");
 		}

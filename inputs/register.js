@@ -35,6 +35,8 @@ module.exports = {
 			game.players[1].name = content;
 		}
 		await names.set(author.id, content);
+		const game_cache = require("../index");
+		game_cache.setGame(channel.id, game);
 		await games.set(channel.id, game);
 	},
 };

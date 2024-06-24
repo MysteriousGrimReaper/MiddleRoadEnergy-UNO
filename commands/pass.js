@@ -130,6 +130,8 @@ module.exports = {
 			});
 		}
 		game.powerplay = undefined;
+		const game_cache = require("../index.js");
+		game_cache.setGame(channel.id, game);
 		await games.set(`${channel.id}`, game);
 	},
 };

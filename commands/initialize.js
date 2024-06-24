@@ -1,5 +1,5 @@
 const { QuickDB } = require("quick.db");
-const { base, oops_all_wild } = require("../deck.json");
+const { base, oops_all_wild, large } = require("../deck.json");
 const db = new QuickDB();
 const games = db.table("games");
 const setting = db.table("settings");

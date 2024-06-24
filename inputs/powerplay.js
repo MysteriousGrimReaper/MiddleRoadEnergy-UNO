@@ -121,6 +121,8 @@ module.exports = {
 				`**POWER PLAY!!** Your opponent will be forced to draw a card.`
 			);
 		}
+		const game_cache = require("../index");
+		game_cache.setGame(channel.id, game);
 		await games.set(`${channel.id}`, game);
 	},
 };
