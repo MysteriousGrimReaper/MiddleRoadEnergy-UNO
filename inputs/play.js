@@ -330,6 +330,30 @@ module.exports = {
 				player: game.players[current_turn].name,
 				top_card,
 			});
+			const play_embed = new EmbedBuilder()
+				.setDescription(
+					`A **${display_names[top_card.color]} ${
+						top_card.wild ? `WILD` : ``
+					}${
+						top_card.icon
+					}** has been played. ${extra}\n\nIt is now ${
+						game.players[game.table.current_turn].name
+					}'s turn!`
+				)
+				.setColor(parseInt(embed_colors[top_card.color], 16))
+				.setThumbnail(
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+						top_card.color
+					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
+				)
+				.setFooter({
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
+				});
+			await channel.send({
+				embeds: [play_embed],
+				components: [button_row],
+			});
 			if (game.players[current_turn].hand.length === 0) {
 				await channel.send(
 					`Good game! ${game.players[current_turn].name} has won!`
@@ -350,6 +374,7 @@ module.exports = {
 				game.log[game.matches_finished].end = Date.now();
 				game.log[game.matches_finished].winner = current_turn;
 				game.matches_finished++;
+				game.powerplay = false;
 				game.table.current_turn =
 					game.turn_indicator[game.matches_finished];
 
@@ -447,30 +472,7 @@ module.exports = {
 				game_cache.setGame(channel.id, game);
 				return await games.set(`${channel.id}`, game);
 			}
-			const play_embed = new EmbedBuilder()
-				.setDescription(
-					`A **${display_names[top_card.color]} ${
-						top_card.wild ? `WILD` : ``
-					}${
-						top_card.icon
-					}** has been played. ${extra}\n\nIt is now ${
-						game.players[game.table.current_turn].name
-					}'s turn!`
-				)
-				.setColor(parseInt(embed_colors[top_card.color], 16))
-				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
-						top_card.color
-					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-				)
-				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
-					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
-				});
-			await channel.send({
-				embeds: [play_embed],
-				components: [button_row],
-			});
+
 			if (game.powerplay && current_turn != game.table.current_turn) {
 				const amount = 1;
 				if (game.deck.length < amount) {

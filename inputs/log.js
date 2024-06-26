@@ -15,29 +15,33 @@ module.exports = {
 		}
 		let { table, log, players } = game;
 		log = log.filter((l) => l.end);
-		if (log?.length < 1) {
-			return await channel.send(`There are no logs for this game yet!`);
+		let log_text = ``;
+		if (log.length > 0) {
+			const total_time = log
+				.map((l) => l.end - l.start)
+				.reduce((acc, cv) => acc + cv, 0);
+
+			const avg_time = total_time / log.length;
+			log_text +=
+				log.reduce(
+					(acc, cv) =>
+						acc +
+						`**Game ${log.indexOf(cv) + 1} - ${
+							players[cv.winner].name
+						} - ${cv.cards} cards - ${Math.floor(
+							(cv.end - cv.start) / 1000 / 60
+						)}m ${
+							Math.floor((cv.end - cv.start) / 1000) % 60
+						}s**\n`,
+					``
+				) +
+				`\n**Total Time: ${Math.floor(total_time / 1000 / 60)}m ${
+					Math.floor(total_time / 1000) % 60
+				}s**\n**Average Time: ${Math.floor(avg_time / 1000 / 60)}m ${
+					Math.floor(avg_time / 1000) % 60
+				}s**`;
 		}
-		const total_time = log
-			.map((l) => l.end - l.start)
-			.reduce((acc, cv) => acc + cv, 0);
-		const avg_time = total_time / log.length;
-		let log_text =
-			log.reduce(
-				(acc, cv) =>
-					acc +
-					`**Game ${log.indexOf(cv) + 1} - ${
-						players[cv.winner].name
-					} - ${cv.cards} cards - ${Math.floor(
-						(cv.end - cv.start) / 1000 / 60
-					)}m ${Math.floor((cv.end - cv.start) / 1000) % 60}s**\n`,
-				``
-			) +
-			`\n**Total Time: ${Math.floor(total_time / 1000 / 60)}m ${
-				Math.floor(total_time / 1000) % 60
-			}s**\n**Average Time: ${Math.floor(avg_time / 1000 / 60)}m ${
-				Math.floor(avg_time / 1000) % 60
-			}**`;
+
 		if (game.on) {
 			const current_time = Date.now();
 			const t_diff = current_time - game.log[game.log.length - 1].start;
