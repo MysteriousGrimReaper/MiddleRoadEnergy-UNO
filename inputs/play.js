@@ -50,6 +50,20 @@ module.exports = {
 		const { author, channel, client } = message;
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
+		const chain_update = () => {
+			if (game.table.current_turn == current_turn) {
+				game.players[current_turn].chain++;
+			} else {
+				game.players[current_turn].chain = 0;
+			}
+			if (
+				game.players[current_turn].stats.longest_chain <=
+				game.players[current_turn].chain + 1
+			) {
+				game.players[current_turn].stats.longest_chain =
+					game.players[current_turn].chain + 1;
+			}
+		};
 		if (game.processing) {
 			return;
 		}
@@ -139,6 +153,7 @@ module.exports = {
 				"W +4": "WILD+4",
 			};
 			let _color = parseColor(color);
+
 			if (!_color) {
 				if (
 					!color &&
@@ -375,6 +390,7 @@ module.exports = {
 				game.log[game.matches_finished].winner = current_turn;
 				game.matches_finished++;
 				game.powerplay = false;
+				chain_update();
 				game.table.current_turn =
 					game.turn_indicator[game.matches_finished];
 
@@ -518,18 +534,7 @@ module.exports = {
 					`**UNO!!** ${game.players[current_turn].name} only has 1 card left!`
 				);
 			}
-			if (game.table.current_turn == current_turn) {
-				game.players[current_turn].chain++;
-			} else {
-				game.players[current_turn].chain = 0;
-			}
-			if (
-				game.players[current_turn].stats.longest_chain <=
-				game.players[current_turn].chain + 1
-			) {
-				game.players[current_turn].stats.longest_chain =
-					game.players[current_turn].chain + 1;
-			}
+			chain_update();
 			const game_cache = require("../index");
 			game_cache.setGame(channel.id, game);
 			return await games.set(`${channel.id}`, game);

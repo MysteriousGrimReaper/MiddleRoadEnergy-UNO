@@ -55,6 +55,7 @@ for (const file of eventFiles) {
 }
 
 // player commands
+
 const inputsPath = path.join(__dirname, "inputs");
 const inputFiles = fs
 	.readdirSync(inputsPath)
@@ -70,52 +71,66 @@ for (const file of inputFiles) {
 	}
 	command_inputs.push({ names, input, execute });
 }
-const uno_message_listener = async (message) => {
-	client.off("messageCreate", uno_message_listener);
-	console.log(message.id);
-	let { content } = message;
-	content = content.toLowerCase();
-	if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
-		client.on("messageCreate", uno_message_listener);
+
+const input_queue = [];
+let is_processing_commands = false;
+const uno_message_listener = async (m) => {
+	input_queue.push(m);
+	if (input_queue.length > 1) {
 		return;
 	}
-	const { channel, guildId } = message;
-	const game = await games.get(channel.id);
-	if (!game) {
-		client.on("messageCreate", uno_message_listener);
-		return await message.reply(
-			`There's no game going on in this channel right now! Wait for a referee to start one.`
-		);
-	}
-	if (!game.command_list) {
-		game.command_list = [];
-	}
-	// console.log(game);
-	const commands = content.split(`&&`);
-	if (game.settings.max_command_chain > 0) {
-		commands.splice(game?.settings?.max_command_chain);
-	}
-	for (c of commands) {
-		const a = c.trim().split(` `);
-		for (ci of command_inputs) {
-			const { names, execute, input } = ci;
-			// console.log(ci);
-			if (
-				names.reduce(
-					(acc, cv) =>
-						acc ||
-						a[0] == `${prefix}${cv}` ||
-						(a[0] == cv && commands.indexOf(c) > 0),
-					false
-				)
-			) {
-				await execute(message, game, c.trim());
-			} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
-				await execute(message, game, c.trim());
+	is_processing_commands = true;
+	while (input_queue.length > 0) {
+		const message = input_queue[0];
+		let { content } = message;
+		content = content.toLowerCase();
+		if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
+			input_queue.shift();
+			return;
+		}
+		const { channel, guildId } = message;
+		const game =
+			game_cache.getGame(channel.id) ?? (await games.get(channel.id));
+		if (!game) {
+			input_queue.shift();
+			is_processing_commands = false;
+			return await message.reply(
+				`There's no game going on in this channel right now! Wait for a referee to start one.`
+			);
+		}
+		if (!game.command_list) {
+			game.command_list = [];
+		}
+		// console.log(game);
+		const commands = content.split(`&&`);
+		if (game.settings.max_command_chain > 0) {
+			commands.splice(game?.settings?.max_command_chain);
+		}
+		for (c of commands) {
+			const a = c.trim().split(` `);
+			for (ci of command_inputs) {
+				const { names, execute, input } = ci;
+				// console.log(ci);
+				if (
+					names.reduce(
+						(acc, cv) =>
+							acc ||
+							a[0] == `${prefix}${cv}` ||
+							(a[0] == cv && commands.indexOf(c) > 0),
+						false
+					)
+				) {
+					await execute(message, game, c.trim());
+				} else if (
+					names.reduce((acc, cv) => acc || a[1] == cv, false)
+				) {
+					await execute(message, game, c.trim());
+				}
 			}
 		}
+		input_queue.shift();
+		is_processing_commands = false;
 	}
-	client.on("messageCreate", uno_message_listener);
 };
 client.on("messageCreate", uno_message_listener);
 

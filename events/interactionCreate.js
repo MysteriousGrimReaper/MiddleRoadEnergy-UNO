@@ -124,6 +124,46 @@ module.exports = {
 									}${italicize(cv) ? `__` : ``}`,
 								``
 							);
+							const player_hand_color =
+								`\`\`\`ansi\n` +
+								player_hand_a.reduce(
+									(acc, cv, index) =>
+										acc +
+										`${
+											cv.color !=
+											player_hand_a[index - 1]?.color
+												? `[0m\n${
+														cv.color == `R`
+															? `[2;31m`
+															: cv.color == `G`
+															? `[2;32m `
+															: cv.color == `Y`
+															? `[2;33m `
+															: cv.color == `B`
+															? `[2;34m `
+															: cv.color == `W`
+															? `[2;30m `
+															: ``
+												  }`
+												: ` | `
+										}${italicize(cv) ? `__` : ``}${
+											cv.wild ||
+											cv.color == top_card.color ||
+											cv.icon == top_card.icon
+												? `**`
+												: ``
+										}${display_names[cv.color]}${
+											cv.icon == `` ? `` : ` `
+										}${cv.icon}${
+											cv.wild ||
+											cv.color == top_card.color ||
+											cv.icon == top_card.icon
+												? `**`
+												: ``
+										}${italicize(cv) ? `__` : ``}`,
+									``
+								) +
+								`\`\`\``;
 							const hand_embed = new EmbedBuilder()
 								.setAuthor({
 									name: author.displayName,
