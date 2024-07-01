@@ -47,6 +47,7 @@ module.exports = {
 	name: `play`,
 	aliases: [`p`],
 	async execute(message, game, content) {
+		const start_time = Date.now();
 		const { author, channel, client } = message;
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
@@ -345,6 +346,7 @@ module.exports = {
 				player: game.players[current_turn].name,
 				top_card,
 			});
+			const ping = Date.now() - start_time;
 			const play_embed = new EmbedBuilder()
 				.setDescription(
 					`A **${display_names[top_card.color]} ${
@@ -363,7 +365,13 @@ module.exports = {
 				)
 				.setFooter({
 					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
-					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
+					text: `Deck: ${
+						game.deck.length
+					} cards remaining | Discarded: ${
+						game.table.cards.length
+					} | Ping: ${
+						ping > 500 ? `🔴` : ping > 250 ? `🟡` : `🟢`
+					}${ping} ms`,
 				});
 			await channel.send({
 				embeds: [play_embed],

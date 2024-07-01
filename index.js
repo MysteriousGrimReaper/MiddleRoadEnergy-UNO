@@ -75,7 +75,11 @@ for (const file of inputFiles) {
 const input_queue = [];
 let is_processing_commands = false;
 const uno_message_listener = async (m) => {
+	if (m.author.bot || !m.content.toLowerCase().startsWith(prefix)) {
+		return;
+	}
 	input_queue.push(m);
+	console.log(input_queue);
 	if (input_queue.length > 1) {
 		return;
 	}
@@ -84,10 +88,6 @@ const uno_message_listener = async (m) => {
 		const message = input_queue[0];
 		let { content } = message;
 		content = content.toLowerCase();
-		if (message.author.bot || !content.toLowerCase().startsWith(prefix)) {
-			input_queue.shift();
-			return;
-		}
 		const { channel, guildId } = message;
 		const game =
 			game_cache.getGame(channel.id) ?? (await games.get(channel.id));
