@@ -37,6 +37,7 @@ module.exports = {
 			skips_played: 0,
 			longest_chain: 0,
 			chain: 0,
+			self_cards_drawn: 0,
 		};
 		const no_pp = message.content.includes(`0pp`);
 		const channel = message?.mentions?.channels?.first() ?? message.channel;
@@ -101,6 +102,7 @@ module.exports = {
 					wins: 0,
 					points: 0,
 					stats,
+					ping: false,
 				},
 				{
 					name: second_name,
@@ -110,6 +112,7 @@ module.exports = {
 					wins: 0,
 					points: 0,
 					stats,
+					ping: false,
 				},
 			],
 			matches_finished: 0,

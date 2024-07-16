@@ -24,12 +24,12 @@ module.exports = {
 			return await message.reply(`Couldn't find a valid turn indicator.`);
 		}
 		const turn_indicator = turn_i.split(`-`);
-		console.log(turn_indicator);
+		// console.log(turn_indicator);
 		const start_indicator = turn_indicator.reduce((acc, cv, index) => {
 			acc.push(...Array(parseInt(cv)).fill(index % 2));
 			return acc;
 		}, []);
-		console.log(start_indicator);
+		// console.log(start_indicator);
 		await games.set(`${channel.id}.turn_indicator`, start_indicator);
 		await channel.send(
 			`Turn indicator set to ${turn_indicator.join(`-`)}.`

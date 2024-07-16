@@ -19,8 +19,8 @@ module.exports = {
 		}
 		game.players[0].pp = pp;
 		game.players[1].pp = pp;
-
-		await channel.send(`Power plays set to ${pp}.`);
 		await games.set(`${channel.id}`, game);
+		await channel.send(`Power plays set to ${pp}.`);
+		
 	},
 };

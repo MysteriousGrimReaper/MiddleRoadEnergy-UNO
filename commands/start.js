@@ -42,10 +42,10 @@ module.exports = {
 	aliases: [`s`],
 	description: `Use this command to start a game. Make sure that the starting cards are set BEFORE using this command.`,
 	async execute(message) {
-		console.log(__dirname);
+		// console.log(__dirname);
 		const { channel } = message;
 		const game = await games.get(channel.id);
-		console.log(game);
+		// console.log(game);
 		if (!game) {
 			return await channel.send(
 				`A match has not been initialized in this channel yet! Use \`ref init <@first_player> <@second_player>\` to initialize a match.`
@@ -70,7 +70,7 @@ module.exports = {
 		game.players[1].hand = [];
 		for (let i = 0; i < starting_cards; i++) {
 			if (game.deck.length < 2) {
-				console.log(`Too many starting cards!`);
+				// console.log(`Too many starting cards!`);
 				break;
 			}
 			game.players[0].hand.push(game.deck.pop());

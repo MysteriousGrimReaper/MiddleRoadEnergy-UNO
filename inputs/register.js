@@ -24,7 +24,7 @@ module.exports = {
 			args.shift();
 			content = args.join(` `);
 		}
-		if (content.length < 1) {
+		if (content.length < 1 || content.length > 200) {
 			return await channel.send(`Invalid name.`);
 		}
 		await channel.send(`Name set to \`${content}\`.`);

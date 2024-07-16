@@ -77,6 +77,7 @@ module.exports = {
 		const draw_chunk = game.deck.splice(0, amount);
 		game.players[current_turn].hand.push(...draw_chunk);
 		game.players[current_turn].stats.cards_drawn += amount;
+		game.players[current_turn].stats.self_cards_drawn += amount;
 		game.table.current_turn++;
 		game.table.current_turn %= 2;
 		const top_card = game.table.cards[game.table.cards.length - 1];
@@ -146,6 +147,11 @@ module.exports = {
 			});
 		}
 		game.powerplay = undefined;
+		if (game.players[game.table.current_turn].ping) {
+			await channel.send(
+				`<@${game.players[game.table.current_turn].id}>`
+			);
+		}
 		const game_cache = require("../index");
 		game_cache.setGame(channel.id, game);
 		await games.set(`${channel.id}`, game);

@@ -340,7 +340,7 @@ module.exports = {
 			}
 			game.table.current_turn++;
 			game.table.current_turn %= 2;
-			console.log(game.table.current_turn);
+			// console.log(game.table.current_turn);
 			top_card = game.table.cards[game.table.cards.length - 1];
 			game.history.push({
 				player: game.players[current_turn].name,
@@ -470,6 +470,11 @@ module.exports = {
 						},
 						{
 							inline: true,
+							name: `🫱 Cards Self-Drawn`,
+							value: `${names[0]} - ${game.players[0].stats.self_cards_drawn}\n${names[1]} - ${game.players[1].stats.self_cards_drawn}`,
+						},
+						{
+							inline: true,
 							name: `⛓️ Longest Card Chain`,
 							value: `${names[0]} - ${game.players[0].stats.longest_chain}\n${names[1]} - ${game.players[1].stats.longest_chain}`,
 						}
@@ -543,6 +548,11 @@ module.exports = {
 				);
 			}
 			chain_update();
+			if (game.players[game.table.current_turn].ping) {
+				await channel.send(
+					`<@${game.players[game.table.current_turn].id}>`
+				);
+			}
 			const game_cache = require("../index");
 			game_cache.setGame(channel.id, game);
 			return await games.set(`${channel.id}`, game);

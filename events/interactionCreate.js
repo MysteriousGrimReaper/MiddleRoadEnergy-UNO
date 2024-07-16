@@ -383,6 +383,11 @@ module.exports = {
 							},
 							{
 								inline: true,
+								name: `🫱 Cards Self-Drawn`,
+								value: `${names[0]} - ${game.players[0].stats.self_cards_drawn}\n${names[1]} - ${game.players[1].stats.self_cards_drawn}`,
+							},
+							{
+								inline: true,
 								name: `⛓️ Longest Card Chain`,
 								value: `${names[0]} - ${game.players[0].stats.longest_chain}\n${names[1]} - ${game.players[1].stats.longest_chain}`,
 							}

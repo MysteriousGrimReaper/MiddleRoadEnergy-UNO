@@ -11,6 +11,10 @@ class GameCache {
 		this[id] = game;
 		return this;
 	}
+	deleteGame(id) {
+		delete this[id];
+		return this;
+	}
 }
 const game_cache = new GameCache();
 module.exports = game_cache;
@@ -79,7 +83,7 @@ const uno_message_listener = async (m) => {
 		return;
 	}
 	input_queue.push(m);
-	console.log(input_queue);
+	// console.log(input_queue);
 	if (input_queue.length > 1) {
 		return;
 	}
