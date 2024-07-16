@@ -156,14 +156,24 @@ for (const file of commandFiles) {
 		let { content } = message;
 		content = content.toLowerCase();
 		if (
-			!message?.member?.permissions.has(
-				PermissionsBitField.Flags.ManageRoles
-			) ||
 			!message.inGuild() ||
 			message.author.bot ||
 			!content.startsWith(ref_prefix)
 		) {
 			return;
+		}
+		const practice_channel_ids = [
+			`1110377721877499974`,
+			`967583535290548244`,
+			`1209164498624319518`,
+			`1209164739125710868`,
+			`1217987116521226250`,
+			`1217987181768081489`
+		]
+		if (!message?.member?.permissions.has(
+			PermissionsBitField.Flags.ManageRoles
+		) && !practice_channel_ids.includes(message.channel.id)) {
+			return
 		}
 		const a = content.split(` `);
 		if (
