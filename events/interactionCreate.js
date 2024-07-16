@@ -218,6 +218,7 @@ module.exports = {
 							}
 								*/
 						} catch (error) {
+							console.log(error)
 							return await interaction.editReply({
 								ephemeral: true,
 								content: `An error has occurred!`,
