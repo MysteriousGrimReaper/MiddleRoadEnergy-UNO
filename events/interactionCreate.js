@@ -10,27 +10,27 @@ module.exports = {
 			return;
 		}
 		const game_cache = require("../index");
-		console.log(`interaction created`);
+		//console.log(`interaction created`);
 
 		try {
-			console.log(`deferring reply`);
+			//console.log(`deferring reply`);
 			await interaction.deferReply({ ephemeral: true });
 		} catch (error) {
-			console.log(`The interaction thing failed again....`);
-			console.log(error);
-			console.log(interaction);
+			//console.log(`The interaction thing failed again....`);
+			//console.log(error);
+			//console.log(interaction);
 			return;
 		}
-		console.log(`reply deferred`);
+		//console.log(`reply deferred`);
 		try {
 			const { user, channel, customId } = interaction;
 			if (!interaction.isButton()) {
 				return;
 			}
-			console.log(`getting game`);
+			//console.log(`getting game`);
 			const game =
 				game_cache.getGame(channel.id) ?? (await games.get(channel.id));
-			console.log(`game gotten`);
+			//console.log(`game gotten`);
 			if (!game) {
 				return await interaction.editReply({
 					ephemeral: true,
@@ -87,7 +87,7 @@ module.exports = {
 								(p) => p.id == author.id
 							);
 							const italicize = (card) => {
-								// console.log(!card.has_seen);
+								// //console.log(!card.has_seen);
 								// return !card.has_seen;
 								return false;
 							};
@@ -401,7 +401,7 @@ module.exports = {
 					break;
 			}
 		} catch (error) {
-			console.log(error);
+			//console.log(error);
 		}
 	},
 };

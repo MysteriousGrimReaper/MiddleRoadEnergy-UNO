@@ -157,7 +157,7 @@ for (const file of commandFiles) {
 		content = content.toLowerCase();
 		if (
 			!message?.member?.permissions.has(
-				PermissionsBitField.Flags.ManageGuild
+				PermissionsBitField.Flags.ManageRoles
 			) ||
 			!message.inGuild() ||
 			message.author.bot ||
