@@ -40,7 +40,7 @@ module.exports = {
 			self_cards_drawn: 0,
 		};
 		const no_pp = message.content.includes(`0pp`);
-		const channel = message?.mentions?.channels?.first() ?? message.channel;
+		const channel = /*message?.mentions?.channels?.first() ?? */message.channel;
 		const first_player = message?.mentions?.members?.at(0);
 		const second_player = message?.mentions?.members?.at(1);
 		function isValidTurnIndicator(turnIndicator) {
