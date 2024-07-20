@@ -77,7 +77,7 @@ module.exports = {
 			return await message.reply(`You can't use an offensive power play mid-chain!`)
 		}
 		// can't call pp on uno
-		if (!players[1 - calling_player_index].hand.length == 1) {
+		if (players[1 - calling_player_index].hand.length == 1) {
 			return await message.reply(`You can't call a power play when your opponent has 1 card left!`)
 		}
 		if (game.powerplay) {
