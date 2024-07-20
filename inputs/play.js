@@ -553,6 +553,14 @@ module.exports = {
 					`<@${game.players[game.table.current_turn].id}>`
 				);
 			}
+			game.players[current_turn].has_played_since_last_pp = true
+			if (current_turn == game.table.current_turn) {
+				game.players[current_turn].currently_running = true
+			}
+			else {
+				game.players[0].currently_running = false
+				game.players[1].currently_running = false
+			}
 			const game_cache = require("../index");
 			game_cache.setGame(channel.id, game);
 			return await games.set(`${channel.id}`, game);

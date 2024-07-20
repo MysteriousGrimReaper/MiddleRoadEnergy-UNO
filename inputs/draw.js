@@ -78,6 +78,7 @@ module.exports = {
 		game.players[current_turn].hand.push(...draw_chunk);
 		game.players[current_turn].stats.cards_drawn += amount;
 		game.players[current_turn].stats.self_cards_drawn += amount;
+		game.players[current_turn].currently_running = false
 		game.table.current_turn++;
 		game.table.current_turn %= 2;
 		const top_card = game.table.cards[game.table.cards.length - 1];
@@ -101,7 +102,6 @@ module.exports = {
 				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 			});
 		await channel.send({ embeds: [play_embed], components: [button_row] });
-
 		if (game.powerplay && current_turn != game.table.current_turn) {
 			const amount = 1;
 			if (game.deck.length < amount) {

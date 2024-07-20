@@ -59,13 +59,29 @@ module.exports = {
 		if (author.id != players[0].id && author.id != players[1].id) {
 			return await message.reply(`You're not in the game!`);
 		}
-
-		if (players.find((p) => p.id == author.id).pp < 1) {
+		const calling_player_index = players.findIndex((p) => p.id == author.id)
+		const calling_player = players[calling_player_index]
+		if (calling_player.pp < 1) {
 			return await message.reply(`You used your power play already!`);
+		}
+		// first turn of game / cant call it right after opponent has used one
+		if (!(players[0].has_played_since_last_pp && players[1].has_played_since_last_pp)) {
+			return await message.reply(`Invalid power play! Wait until both players have played a card before using a power play.`)
+		}
+		// defensive (using a pp on the opponents turn) is when the player has played at least one card and their turn is still going
+		if (!players[1 - calling_player_index].currently_running && current_turn != calling_player_index) {
+			return await message.reply(`A defensive power play can only be used mid-chain!`)
+		}
+		// offensive PPs (using a pp on your turn) they have to be before you play any card
+		if (calling_player.currently_running) {
+			return await message.reply(`You can't use an offensive power play mid-chain!`)
 		}
 		if (game.powerplay) {
 			return await message.reply(`A power play is already active!`);
 		}
+		players[0].has_played_since_last_pp = false
+		players[1].has_played_since_last_pp = false
+		
 		game.powerplay = true;
 		game.players.find((p) => p.id == author.id).pp--;
 		if (
