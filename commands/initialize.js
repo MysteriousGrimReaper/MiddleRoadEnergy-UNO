@@ -18,12 +18,12 @@ module.exports = {
 	async execute(message) {
 		let settings = settings = {
 			max_command_chain: 0,
-			viewers_see_history: false,
+			viewers_see_history: true,
 			viewers_see_table: true,
 			players_see_history: true,
 			custom_cards: true,
 		};
-		Object.assign(settings, await setting.get(message.guildId));
+		// Object.assign(settings, await setting.get(message.guildId));
 		const stats = {
 			cards_played: 0,
 			plus_4s_played: 0,
