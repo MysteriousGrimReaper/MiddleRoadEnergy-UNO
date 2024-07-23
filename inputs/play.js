@@ -376,9 +376,7 @@ module.exports = {
 						game.deck.length
 					} cards remaining | Discarded: ${
 						game.table.cards.length
-					} | Ping: ${
-						ping > 500 ? `🔴` : ping > 250 ? `🟡` : `🟢`
-					}${ping} ms`,
+					}`,
 				});
 			await channel.send({
 				embeds: [play_embed],
