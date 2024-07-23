@@ -35,7 +35,11 @@ module.exports = {
 		if (game.deck.length < amount) {
 			await channel.send(`*Reshuffling the deck...*`);
 			while (table.cards.length > 1) {
-				game.deck.push(game.table.cards.shift());
+				const card = game.table.cards.shift()
+				if (card.wild) {
+					card.color = "WILD"
+				}
+				game.deck.push(card);
 			}
 			game.deck = shuffleArray(game.deck);
 		}
