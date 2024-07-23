@@ -124,12 +124,12 @@ module.exports = {
 					)
 				)
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 				});
 			await channel.send({

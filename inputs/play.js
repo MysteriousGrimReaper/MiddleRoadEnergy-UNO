@@ -16,7 +16,6 @@ const {
 } = require("discord.js");
 const db = new QuickDB();
 const games = db.table("games");
-const settings = db.table("settings");
 const hand_button = new ButtonBuilder()
 	.setCustomId(`hand`)
 	.setStyle(ButtonStyle.Primary)
@@ -359,12 +358,12 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 					text: `Deck: ${
 						game.deck.length
 					} cards remaining | Discarded: ${
@@ -527,12 +526,12 @@ module.exports = {
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(
-						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 							top_card.color
 						}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 					)
 					.setFooter({
-						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 						text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 					});
 				game.powerplay = undefined;
