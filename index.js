@@ -194,9 +194,10 @@ async function cacheInitialize() {
 	});
 }
 cacheInitialize();
+
 client.login(test ? testToken : token);
-/*
-const yourUserId = "1014413186017021952";
+
+const yourUserId = "315495597874610178";
 
 process.on("uncaughtException", (error) => {
 	// Retrieve your user object
@@ -205,4 +206,4 @@ process.on("uncaughtException", (error) => {
 	// Send the error message to yourself via DM
 	user.send(`An error occurred: ${error}`);
 });
-*/
+

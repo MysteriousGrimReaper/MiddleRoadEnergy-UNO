@@ -353,7 +353,6 @@ module.exports = {
 				player: game.players[current_turn].name,
 				top_card,
 			});
-			const ping = Date.now() - start_time;
 			const play_embed = new EmbedBuilder()
 				.setDescription(
 					`A **${display_names[top_card.color]} ${

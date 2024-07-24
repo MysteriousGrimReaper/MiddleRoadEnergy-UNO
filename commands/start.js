@@ -61,6 +61,9 @@ module.exports = {
 				`A game has already started! Use \`ref continue\` to unpause it.`
 			);
 		}
+		if (game.turn_indicator.length != game.bestof) {
+			return await channel.send(`The turn indicator doesn't match the number of games! Use \`ref ti #-#-#-...\` or \`ref bestof #\` to set the proper number of games.`)
+		}
 		const starting_cards = game.cards;
 		game.on = true;
 		game.powerplay = false;
