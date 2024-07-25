@@ -503,6 +503,9 @@ module.exports = {
 				await channel.send({ embeds: [stats_embed] });
 				const game_cache = require("../index");
 				game_cache.setGame(channel.id, game);
+				if (match_is_finished) {
+					await channel.send(`The series has ended! Use \`ref close\` to close the series.`)
+				}
 				return await games.set(`${channel.id}`, game);
 			}
 
