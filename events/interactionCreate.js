@@ -340,6 +340,7 @@ module.exports = {
 				case `stats`:
 					const names = players.map((p) => p.name);
 					const stats_embed = new EmbedBuilder()
+						.setDescription(`${game.players[0].name} ${game.players[0].wins}-${game.players[1].wins} ${game.players[1].name}`)
 						.addFields(
 							{
 								name: `🎴 Cards Played`,
