@@ -198,11 +198,11 @@ cacheInitialize();
 client.login(test ? testToken : token);
 
 const yourUserId = "315495597874610178";
-
+const user = client.users.fetch(yourUserId);
 process.on("uncaughtException", (error) => {
 	// Retrieve your user object
-	const user = client.users.cache.get(yourUserId);
 
+	console.log(error)
 	// Send the error message to yourself via DM
 	user.send(`An error occurred: ${error}`);
 });

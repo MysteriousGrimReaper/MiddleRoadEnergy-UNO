@@ -2,22 +2,34 @@ const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
-	name: `eval`,
-	aliases: [`e`],
+	name: `debug`,
+	aliases: [],
 	debug: true,
-	description: `Evaluate JS code.`,
+	description: `Turns on JS debug evaluation mode.`,
 	async execute(message) {
 		if (message.author.id != `315495597874610178`) {
 			return;
 		}
-		const input = message.content.slice(4);
-		try {
-			return await message.reply(eval(input));
-		} catch (error) {
-			console.log(error);
-			return await message.reply(
-				`An error occurred! Check the logs for more info.`
-			);
-		}
+		message.reply(`Debug mode active.`)
+		const filter = (m) => m.author.id == `315495597874610178`
+		const collector = message.channel.createMessageCollector({filter})
+		collector.on(`collect`, async (c_message) => {
+			const {content} = c_message
+			if (content == `stop`) {
+				collector.stop()
+				return
+			}
+			const game = await games.get(message.channel.id)
+			try {
+				await eval(`(async () => {${content}})()`)
+				console.log(`Evaluated command ${content}`)
+			}
+			catch (error) {
+				c_message.reply(`An error occurred: ${error}`)
+			}
+		})
+		collector.on(`end`, () => {
+			message.channel.send(`Debug session closed.`)
+		})
 	},
 };
