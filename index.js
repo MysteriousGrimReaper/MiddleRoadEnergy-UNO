@@ -203,7 +203,5 @@ process.on("uncaughtException", (error) => {
 	// Retrieve your user object
 
 	console.log(error)
-	// Send the error message to yourself via DM
-	user.send(`An error occurred: ${error}`);
 });
 
