@@ -23,7 +23,7 @@ module.exports = {
 			players_see_history: true,
 			custom_cards: true,
 		};
-		Object.assign(settings, await setting.get(message.guildId));
+		Object.assign(settings, await setting.get(message.channel.id));
 		const stats = {
 			cards_played: 0,
 			plus_4s_played: 0,
