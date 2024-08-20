@@ -70,7 +70,11 @@ module.exports = {
 		if (game.deck.length < amount) {
 			await channel.send(`*Reshuffling the deck...*`);
 			while (table.cards.length > 1) {
-				game.deck.push(game.table.cards.shift());
+				const card = game.table.cards.shift()
+				if (card.wild) {
+					card.color = "WILD"
+				}
+				game.deck.push(card);
 			}
 			game.deck = shuffleArray(game.deck);
 		}
@@ -78,6 +82,7 @@ module.exports = {
 		game.players[current_turn].hand.push(...draw_chunk);
 		game.players[current_turn].stats.cards_drawn += amount;
 		game.players[current_turn].stats.self_cards_drawn += amount;
+		game.players[current_turn].currently_running = false
 		game.table.current_turn++;
 		game.table.current_turn %= 2;
 		const top_card = game.table.cards[game.table.cards.length - 1];
@@ -92,22 +97,25 @@ module.exports = {
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 					top_card.color
 				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 			)
 			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 			});
 		await channel.send({ embeds: [play_embed], components: [button_row] });
-
 		if (game.powerplay && current_turn != game.table.current_turn) {
 			const amount = 1;
 			if (game.deck.length < amount) {
 				await channel.send(`*Reshuffling the deck...*`);
 				while (table.cards.length > 1) {
-					game.deck.push(game.table.cards.shift());
+					const card = game.table.cards.shift()
+					if (card.wild) {
+						card.color = "WILD"
+					}
+					game.deck.push(card);
 				}
 				game.deck = shuffleArray(game.deck);
 			}
@@ -126,19 +134,17 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 					text: `Deck: ${
 						game.deck.length
 					} cards remaining | Discarded: ${
 						game.table.cards.length
-					} | Ping: ${
-						ping > 500 ? `🔴` : ping > 250 ? `🟡` : `🟢`
-					}${ping} ms`,
+					}`,
 				});
 			game.powerplay = undefined;
 			await channel.send({

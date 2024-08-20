@@ -16,16 +16,14 @@ module.exports = {
 	aliases: [`init`, `i`],
 	description: `Initialize a match between two players by pinging them. This should only be run once at the start of a game set.`,
 	async execute(message) {
-		let settings = await setting.get(message.guildId);
-		if (!settings) {
-			settings = {
-				max_command_chain: 0,
-				viewers_see_history: false,
-				viewers_see_table: true,
-				players_see_history: true,
-				custom_cards: true,
-			};
-		}
+		let settings = {
+			max_command_chain: 0,
+			viewers_see_history: true,
+			viewers_see_table: true,
+			players_see_history: true,
+			custom_cards: true,
+		};
+		Object.assign(settings, await setting.get(message.channel.id));
 		const stats = {
 			cards_played: 0,
 			plus_4s_played: 0,
@@ -103,6 +101,8 @@ module.exports = {
 					points: 0,
 					stats,
 					ping: false,
+					has_played_since_last_pp: false,
+					currently_running: false
 				},
 				{
 					name: second_name,
@@ -113,6 +113,8 @@ module.exports = {
 					points: 0,
 					stats,
 					ping: false,
+					has_played_since_last_pp: false,
+					currently_running: false
 				},
 			],
 			matches_finished: 0,

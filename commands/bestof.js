@@ -20,7 +20,7 @@ module.exports = {
 		await channel.send(
 			`Game count set to ${bestof}.${
 				bestof % 2 == 0
-					? `\n⚠️ **Warning!** Number of games is an even number. There might be some unexpected behvaior.`
+					? `\n⚠️ **Warning!** Number of games is an even number. There might be some unexpected behavior.`
 					: ``
 			}`
 		);

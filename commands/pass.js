@@ -62,7 +62,11 @@ module.exports = {
 		if (game.deck.length < amount) {
 			await channel.send(`*Reshuffling the deck...*`);
 			while (table.cards.length > 1) {
-				game.deck.push(game.table.cards.shift());
+				const card = game.table.cards.shift()
+				if (card.wild) {
+					card.color = "WILD"
+				}
+				game.deck.push(card);
 			}
 			game.deck = shuffleArray(game.deck);
 		}
@@ -81,12 +85,12 @@ module.exports = {
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 					top_card.color
 				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 			)
 			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 			});
 		await channel.send({ embeds: [play_embed], components: [button_row] });
@@ -96,7 +100,11 @@ module.exports = {
 			if (game.deck.length < amount) {
 				await channel.send(`*Reshuffling the deck...*`);
 				while (table.cards.length > 1) {
-					game.deck.push(game.table.cards.shift());
+					const card = game.table.cards.shift()
+					if (card.wild) {
+						card.color = "WILD"
+					}
+					game.deck.push(card);
 				}
 				game.deck = shuffleArray(game.deck);
 			}
@@ -115,12 +123,12 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 				});
 			game.powerplay = undefined;

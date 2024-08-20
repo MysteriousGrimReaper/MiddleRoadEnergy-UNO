@@ -251,14 +251,14 @@ module.exports = {
 								parseInt(embed_colors[top_card.color], 16)
 							)
 							.setThumbnail(
-								`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+								`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 									top_card.color
 								}${top_card.wild ? `WILD` : ``}${
 									top_card.icon
 								}.png`
 							)
 							.setFooter({
-								iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+								iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 								text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 							});
 						return await interaction.editReply({
@@ -324,12 +324,12 @@ module.exports = {
 						.setDescription(chart_text)
 						.setColor(parseInt(embed_colors[top_card.color], 16))
 						.setThumbnail(
-							`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+							`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 								top_card.color
 							}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 						)
 						.setFooter({
-							iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+							iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 							text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 						});
 					return await interaction.editReply({
@@ -340,6 +340,7 @@ module.exports = {
 				case `stats`:
 					const names = players.map((p) => p.name);
 					const stats_embed = new EmbedBuilder()
+						.setDescription(`${game.players[0].name} ${game.players[0].wins}-${game.players[1].wins} ${game.players[1].name}`)
 						.addFields(
 							{
 								name: `🎴 Cards Played`,

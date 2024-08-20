@@ -16,7 +16,6 @@ const {
 } = require("discord.js");
 const db = new QuickDB();
 const games = db.table("games");
-const settings = db.table("settings");
 const hand_button = new ButtonBuilder()
 	.setCustomId(`hand`)
 	.setStyle(ButtonStyle.Primary)
@@ -288,7 +287,11 @@ module.exports = {
 					if (game.deck.length < amount) {
 						await channel.send(`*Reshuffling the deck...*`);
 						while (table.cards.length > 1) {
-							game.deck.push(game.table.cards.shift());
+							const card = game.table.cards.shift()
+							if (card.wild) {
+								card.color = "WILD"
+							}
+							game.deck.push(card);
 						}
 						game.deck = shuffleArray(game.deck);
 					}
@@ -315,7 +318,11 @@ module.exports = {
 					if (game.deck.length < amount) {
 						await channel.send(`*Reshuffling the deck...*`);
 						while (table.cards.length > 1) {
-							game.deck.push(game.table.cards.shift());
+							const card = game.table.cards.shift()
+							if (card.wild) {
+								card.color = "WILD"
+							}
+							game.deck.push(card);
 						}
 						game.deck = shuffleArray(game.deck);
 					}
@@ -346,7 +353,6 @@ module.exports = {
 				player: game.players[current_turn].name,
 				top_card,
 			});
-			const ping = Date.now() - start_time;
 			const play_embed = new EmbedBuilder()
 				.setDescription(
 					`A **${display_names[top_card.color]} ${
@@ -359,19 +365,17 @@ module.exports = {
 				)
 				.setColor(parseInt(embed_colors[top_card.color], 16))
 				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 						top_card.color
 					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 				)
 				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 					text: `Deck: ${
 						game.deck.length
 					} cards remaining | Discarded: ${
 						game.table.cards.length
-					} | Ping: ${
-						ping > 500 ? `🔴` : ping > 250 ? `🟡` : `🟢`
-					}${ping} ms`,
+					}`,
 				});
 			await channel.send({
 				embeds: [play_embed],
@@ -499,6 +503,9 @@ module.exports = {
 				await channel.send({ embeds: [stats_embed] });
 				const game_cache = require("../index");
 				game_cache.setGame(channel.id, game);
+				if (match_is_finished) {
+					await channel.send(`The series has ended! Use \`ref close\` to close the series.`)
+				}
 				return await games.set(`${channel.id}`, game);
 			}
 
@@ -507,7 +514,11 @@ module.exports = {
 				if (game.deck.length < amount) {
 					await channel.send(`*Reshuffling the deck...*`);
 					while (table.cards.length > 1) {
-						game.deck.push(game.table.cards.shift());
+						const card = game.table.cards.shift()
+						if (card.wild) {
+							card.color = "WILD"
+						}
+						game.deck.push(card);
 					}
 					game.deck = shuffleArray(game.deck);
 				}
@@ -527,12 +538,12 @@ module.exports = {
 					)
 					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(
-						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 							top_card.color
 						}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 					)
 					.setFooter({
-						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 						text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 					});
 				game.powerplay = undefined;
@@ -552,6 +563,14 @@ module.exports = {
 				await channel.send(
 					`<@${game.players[game.table.current_turn].id}>`
 				);
+			}
+			game.players[current_turn].has_played_since_last_pp = true
+			if (current_turn == game.table.current_turn) {
+				game.players[current_turn].currently_running = true
+			}
+			else {
+				game.players[0].currently_running = false
+				game.players[1].currently_running = false
 			}
 			const game_cache = require("../index");
 			game_cache.setGame(channel.id, game);

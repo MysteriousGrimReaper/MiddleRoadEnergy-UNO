@@ -61,6 +61,9 @@ module.exports = {
 				`A game has already started! Use \`ref continue\` to unpause it.`
 			);
 		}
+		if (game.turn_indicator.length != game.bestof) {
+			return await channel.send(`The turn indicator doesn't match the number of games! Use \`ref ti #-#-#-...\` or \`ref bestof #\` to set the proper number of games.`)
+		}
 		const starting_cards = game.cards;
 		game.on = true;
 		game.powerplay = false;
@@ -94,12 +97,12 @@ module.exports = {
 			)
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/${
+				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
 					top_card.wild ? `` : top_card.color
 				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
 			)
 			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/custom-cards/logo.png`,
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
 				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
 			});
 		await channel.send({
