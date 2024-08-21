@@ -56,7 +56,7 @@ module.exports = {
 			const can_view_history =
 				is_ref ||
 				(is_player && game?.settings?.players_see_history != "false") ||
-				game.settings.viewers_see_history != "false";
+				(!is_player && game.settings.viewers_see_history != "false");
 			switch (customId) {
 				case `hand`:
 					if (!is_player) {
