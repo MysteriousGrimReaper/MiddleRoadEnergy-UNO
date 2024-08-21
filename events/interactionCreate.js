@@ -55,8 +55,8 @@ module.exports = {
 				is_ref || is_player || game.settings.viewers_see_table;
 			const can_view_history =
 				is_ref ||
-				(is_player && game?.settings?.players_see_history) ||
-				game.settings.viewers_see_history;
+				(is_player && game?.settings?.players_see_history != "false") ||
+				game.settings.viewers_see_history != "false";
 			switch (customId) {
 				case `hand`:
 					if (!is_player) {
@@ -273,6 +273,9 @@ module.exports = {
 					}
 					break;
 				case `history`:
+					console.log(is_ref)
+					console.log((is_player && game?.settings?.players_see_history))
+					console.log(game.settings.viewers_see_history)
 					if (!can_view_history) {
 						return await interaction.editReply({
 							ephemeral: true,
