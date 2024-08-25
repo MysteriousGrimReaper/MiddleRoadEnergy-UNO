@@ -143,7 +143,7 @@ const commandsPath = path.join(__dirname, "commands");
 const commandFiles = fs
 	.readdirSync(commandsPath)
 	.filter((file) => file.endsWith(".js"));
-
+const ref_commands = []
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
@@ -152,32 +152,10 @@ for (const file of commandFiles) {
 	if (aliases) {
 		names.push(...aliases);
 	}
+	ref_commands.push({ names, command, execute });
 	client.on("messageCreate", (message) => {
 		let { content } = message;
 		content = content.toLowerCase();
-		if (
-			!message.inGuild() ||
-			message.author.bot ||
-			!content.startsWith(ref_prefix)
-		) {
-			return;
-		}
-		const practice_channel_ids = [
-			`1110377721877499974`,
-			`967583535290548244`,
-			`1209164498624319518`,
-			`1209164739125710868`,
-			`1217987116521226250`,
-			`1217987181768081489`,
-			`1217987181768081489`,
-			`1273424231782158409`,
-			`1273424302858829896`,
-		]
-		if (!message?.member?.permissions.has(
-			PermissionsBitField.Flags.ManageRoles
-		) && !practice_channel_ids.includes(message.channel.id)) {
-			return
-		}
 		const a = content.split(` `);
 		if (
 			names.reduce(
@@ -191,6 +169,84 @@ for (const file of commandFiles) {
 		}
 	});
 }
+const ref_message_listener = async (m) => {
+	if (
+		!m.inGuild() ||
+		m.author.bot ||
+		!m.content.startsWith(ref_prefix)
+	) {
+		return;
+	}
+	const practice_channel_ids = [
+		`1110377721877499974`,
+		`967583535290548244`,
+		`1209164498624319518`,
+		`1209164739125710868`,
+		`1217987116521226250`,
+		`1217987181768081489`,
+		`1217987181768081489`,
+		`1273424231782158409`,
+		`1273424302858829896`,
+	]
+	if (!m?.member?.permissions.has(
+		PermissionsBitField.Flags.ManageRoles
+	) && !practice_channel_ids.includes(m.channel.id)) {
+		return
+	}
+	input_queue.push(m);
+	if (input_queue.length > 1) {
+		return;
+	}
+	is_processing_commands = true;
+	while (input_queue.length > 0) {
+		const message = input_queue[0];
+		let { content } = message;
+		content = content.toLowerCase();
+		const { channel, guildId } = message;
+		const game =
+			game_cache.getGame(channel.id) ?? (await games.get(channel.id));
+		if (!game) {
+			input_queue.shift();
+			is_processing_commands = false;
+			return await message.reply(
+				`There's no game going on in this channel right now! Wait for a referee to start one.`
+			);
+		}
+		if (!game.command_list) {
+			game.command_list = [];
+		}
+		// console.log(game);
+		const commands = content.split(`&&`);
+		if (game.settings.max_command_chain > 0) {
+			commands.splice(game?.settings?.max_command_chain);
+		}
+		for (c of commands) {
+			const a = c.trim().split(` `);
+			for (ci of command_inputs) {
+				const { names, execute, input } = ci;
+				// console.log(ci);
+				if (
+					names.reduce(
+						(acc, cv) =>
+							acc ||
+							a[0] == `${prefix}${cv}` ||
+							(a[0] == cv && commands.indexOf(c) > 0),
+						false
+					)
+				) {
+					await execute(message, game, c.trim());
+				} else if (
+					names.reduce((acc, cv) => acc || a[1] == cv, false)
+				) {
+					await execute(message, game, c.trim());
+				}
+			}
+		}
+		input_queue.shift();
+		is_processing_commands = false;
+	}
+};
+client.on("messageCreate", ref_message_listener)
 async function cacheInitialize() {
 	(await games.all()).forEach((g) => {
 		game_cache.setGame(g.id, g.value);
