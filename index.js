@@ -151,7 +151,6 @@ for (const file of commandFiles) {
 	ref_commands.push({ names, command, execute });
 }
 const ref_message_listener = async (m) => {
-	console.log(m.content)
 	if (
 		!m.inGuild() ||
 		m.author.bot ||
@@ -193,11 +192,9 @@ const ref_message_listener = async (m) => {
 			commands.splice(game?.settings?.max_command_chain);
 		}
 		for (c of commands) {
-			console.log(c)
 			const a = c.trim().split(` `);
 			for (ci of ref_commands) {
 				const { names, execute, input } = ci;
-				console.log(ci);
 				if (
 					names.reduce(
 						(acc, cv) =>
@@ -208,10 +205,6 @@ const ref_message_listener = async (m) => {
 					) || names.reduce((acc, cv) => acc || a[1] == cv, false)
 				) {
 					await execute(message, game, c.trim());
-					console.log(`match`)
-				}
-				else {
-					console.log(`no match`)
 				}
 			}
 		}
