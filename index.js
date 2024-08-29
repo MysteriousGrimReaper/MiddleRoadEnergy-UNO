@@ -122,7 +122,11 @@ const uno_message_listener = async (m) => {
 							a[0] == `${prefix}${cv}` ||
 							(a[0] == cv && commands.indexOf(c) > 0),
 						false
-					) || names.reduce((acc, cv) => acc || a[1] == cv, false)
+					)
+				) {
+					await execute(message, game, c.trim());
+				} else if (
+					names.reduce((acc, cv) => acc || a[1] == cv, false)
 				) {
 					await execute(message, game, c.trim());
 				}
@@ -149,9 +153,23 @@ for (const file of commandFiles) {
 		names.push(...aliases);
 	}
 	ref_commands.push({ names, command, execute });
+	client.on("messageCreate", (message) => {
+		let { content } = message;
+		content = content.toLowerCase();
+		const a = content.split(` `);
+		if (
+			names.reduce(
+				(acc, cv) => acc || a[0] == `${ref_prefix}${cv}`,
+				false
+			)
+		) {
+			execute(message, ...a.slice(1));
+		} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
+			execute(message, ...a.slice(2));
+		}
+	});
 }
 const ref_message_listener = async (m) => {
-	console.log(m.content)
 	if (
 		!m.inGuild() ||
 		m.author.bot ||
@@ -187,31 +205,40 @@ const ref_message_listener = async (m) => {
 		const { channel, guildId } = message;
 		const game =
 			game_cache.getGame(channel.id) ?? (await games.get(channel.id));
+		if (!game) {
+			input_queue.shift();
+			is_processing_commands = false;
+			return await message.reply(
+				`There's no game going on in this channel right now! Wait for a referee to start one.`
+			);
+		}
+		if (!game.command_list) {
+			game.command_list = [];
+		}
 		// console.log(game);
 		const commands = content.split(`&&`);
-		if (game?.settings?.max_command_chain > 0) {
+		if (game.settings.max_command_chain > 0) {
 			commands.splice(game?.settings?.max_command_chain);
 		}
 		for (c of commands) {
-			console.log(c)
 			const a = c.trim().split(` `);
-			for (ci of ref_commands) {
+			for (ci of command_inputs) {
 				const { names, execute, input } = ci;
-				console.log(ci);
+				// console.log(ci);
 				if (
 					names.reduce(
 						(acc, cv) =>
 							acc ||
-							a[0] == `${ref_prefix}${cv}` ||
+							a[0] == `${prefix}${cv}` ||
 							(a[0] == cv && commands.indexOf(c) > 0),
 						false
-					) || names.reduce((acc, cv) => acc || a[1] == cv, false)
+					)
 				) {
 					await execute(message, game, c.trim());
-					console.log(`match`)
-				}
-				else {
-					console.log(`no match`)
+				} else if (
+					names.reduce((acc, cv) => acc || a[1] == cv, false)
+				) {
+					await execute(message, game, c.trim());
 				}
 			}
 		}
