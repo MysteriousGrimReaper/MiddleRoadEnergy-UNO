@@ -83,6 +83,7 @@ module.exports = {
 		game.players[current_turn].stats.cards_drawn += amount;
 		game.players[current_turn].stats.self_cards_drawn += amount;
 		game.players[current_turn].currently_running = false
+		game.players[current_turn].has_played_since_last_pp = true
 		game.table.current_turn++;
 		game.table.current_turn %= 2;
 		const top_card = game.table.cards[game.table.cards.length - 1];
