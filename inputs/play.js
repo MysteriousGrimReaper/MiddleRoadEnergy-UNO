@@ -559,7 +559,7 @@ module.exports = {
 				);
 			}
 			chain_update();
-			if (game.players[game.table.current_turn].ping && current_turn != game.table.current_turn) {
+			if (game.players[game.table.current_turn].ping) {
 				await channel.send(
 					`<@${game.players[game.table.current_turn].id}>`
 				);
