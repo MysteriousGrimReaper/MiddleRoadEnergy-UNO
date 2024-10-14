@@ -5,7 +5,6 @@ module.exports = class GameEmbeds {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		console.log(game.settings.theme)
         return new EmbedBuilder()
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(
