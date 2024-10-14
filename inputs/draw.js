@@ -13,33 +13,9 @@ const {
 	ButtonStyle,
 	ActionRowBuilder,
 } = require("discord.js");
-const hand_button = new ButtonBuilder()
-	.setCustomId(`hand`)
-	.setStyle(ButtonStyle.Primary)
-	.setLabel(`Hand`)
-	.setEmoji(`🎴`);
-const table_button = new ButtonBuilder()
-	.setCustomId(`table`)
-	.setStyle(ButtonStyle.Secondary)
-	.setLabel(`Table`)
-	.setEmoji(`🎨`);
-const history_button = new ButtonBuilder()
-	.setCustomId(`history`)
-	.setStyle(ButtonStyle.Success)
-	.setLabel(`History`)
-	.setEmoji(`🔄`);
-const stats_button = new ButtonBuilder()
-	.setCustomId(`stats`)
-	.setStyle(ButtonStyle.Success)
-	.setLabel(`Stats`)
-	.setEmoji(`📊`);
-
-const button_row = new ActionRowBuilder().setComponents([
-	hand_button,
-	table_button,
-	history_button,
-	stats_button,
-]);
+const GameEmbeds = require("../structures/embeds");
+const InputProcessor = require("../structures/input-processor");
+const button_row = require("../structures/button-row")
 const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
@@ -49,22 +25,10 @@ module.exports = {
 		const start_time = Date.now();
 		const { author, channel } = message;
 		const { on, table, deck, players } = game;
-
 		const { current_turn, cards } = table;
-		if (game.processing) {
+
+		if (!(await InputProcessor.turnCheck(game, message))) {
 			return;
-		}
-		if (!on) {
-			return await message.reply(`The game has not started yet!`);
-		}
-		if (author.id != players[0].id && author.id != players[1].id) {
-			return await message.reply(`You're not in the game!`);
-		}
-		if (
-			(current_turn == 0 && author.id != players[0].id) ||
-			(current_turn == 1 && author.id != players[1].id)
-		) {
-			return await message.reply(`It's not your turn yet!`);
 		}
 		const amount = 1;
 		if (game.deck.length < amount) {
@@ -88,24 +52,7 @@ module.exports = {
 		game.table.current_turn %= 2;
 		const top_card = game.table.cards[game.table.cards.length - 1];
 		const ping = Date.now() - start_time;
-		const play_embed = new EmbedBuilder()
-			.setDescription(
-				`${
-					game.players[current_turn].name
-				} drew a card. \n\nIt is now ${
-					game.players[game.table.current_turn].name
-				}'s turn!`
-			)
-			.setColor(parseInt(embed_colors[top_card.color], 16))
-			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-					top_card.color
-				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-			)
-			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
-				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
-			});
+		const play_embed = GameEmbeds.drawEmbed(game)
 		await channel.send({ embeds: [play_embed], components: [button_row] });
 		if (game.powerplay && current_turn != game.table.current_turn) {
 			const amount = 1;
@@ -125,28 +72,7 @@ module.exports = {
 			game.players[game.table.current_turn].stats.cards_drawn += amount;
 			game.table.current_turn++;
 			game.table.current_turn %= 2;
-			const pp_embed = new EmbedBuilder()
-				.setDescription(
-					`**POWER PLAY!!** ${
-						game.players[1 - current_turn].name
-					} drew a card.\n\nIt is now ${
-						game.players[game.table.current_turn].name
-					}'s turn!`
-				)
-				.setColor(parseInt(embed_colors[top_card.color], 16))
-				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-						top_card.color
-					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-				)
-				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
-					text: `Deck: ${
-						game.deck.length
-					} cards remaining | Discarded: ${
-						game.table.cards.length
-					}`,
-				});
+			const pp_embed = GameEmbeds.ppEmbed(game)
 			game.powerplay = undefined;
 			await channel.send({
 				embeds: [pp_embed],

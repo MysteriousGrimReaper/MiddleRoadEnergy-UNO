@@ -28,7 +28,7 @@ module.exports = {
 		}
 		const conditional =
 			c[1] == `true` ? true : c[1] == false ? false : c[1];
-		await settings.set(`${message.channel.id}.${c[0]}`, conditional);
+		await settings.set(`${guildId}.${c[0]}`, conditional);
 		await message.reply(`\`${c[0]}\` set to ${c[1]}.`);
 		const game = await games.get(channel.id);
 		if (game) {

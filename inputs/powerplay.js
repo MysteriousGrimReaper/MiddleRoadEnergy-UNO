@@ -6,6 +6,7 @@ const {
 	ButtonStyle,
 	ActionRowBuilder,
 } = require("discord.js");
+const GameEmbeds = require("../structures/embeds");
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -15,33 +16,7 @@ function shuffleArray(array) {
 }
 const db = new QuickDB();
 const games = db.table("games");
-const hand_button = new ButtonBuilder()
-	.setCustomId(`hand`)
-	.setStyle(ButtonStyle.Primary)
-	.setLabel(`Hand`)
-	.setEmoji(`🎴`);
-const table_button = new ButtonBuilder()
-	.setCustomId(`table`)
-	.setStyle(ButtonStyle.Secondary)
-	.setLabel(`Table`)
-	.setEmoji(`🎨`);
-const history_button = new ButtonBuilder()
-	.setCustomId(`history`)
-	.setStyle(ButtonStyle.Success)
-	.setLabel(`History`)
-	.setEmoji(`🔄`);
-const stats_button = new ButtonBuilder()
-	.setCustomId(`stats`)
-	.setStyle(ButtonStyle.Success)
-	.setLabel(`Stats`)
-	.setEmoji(`📊`);
-
-const button_row = new ActionRowBuilder().setComponents([
-	hand_button,
-	table_button,
-	history_button,
-	stats_button,
-]);
+const button_row = require("../structures/button-row")
 module.exports = {
 	name: `powerplay`,
 	aliases: [`pp`, `PP`, `Pp`],
@@ -111,31 +86,7 @@ module.exports = {
 			game.table.current_turn %= 2;
 			game.powerplay = undefined;
 			const top_card = game.table.cards[game.table.cards.length - 1];
-			const play_embed = new EmbedBuilder()
-				.setDescription(
-					`**POWER PLAY!!** ${
-						game.players[current_turn].name
-					} drew a card.\n\nIt is now ${
-						game.players[game.table.current_turn].name
-					}'s turn!`
-				)
-				.setColor(
-					parseInt(
-						embed_colors[
-							game.table.cards[game.table.cards.length - 1].color
-						],
-						16
-					)
-				)
-				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-						top_card.color
-					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-				)
-				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
-					text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
-				});
+			const play_embed = GameEmbeds.ppEmbed(game)
 			await channel.send({
 				embeds: [play_embed],
 				components: [button_row],

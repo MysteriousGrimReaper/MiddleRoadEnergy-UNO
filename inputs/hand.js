@@ -1,6 +1,7 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
 const { EmbedBuilder } = require("discord.js");
+const GameEmbeds = require("../structures/embeds");
 const db = new QuickDB();
 const games = db.table("games");
 module.exports = {
@@ -20,23 +21,12 @@ module.exports = {
 			.map((card) => `- ${display_names[card.color]} ${card.icon}`)
 			.sort();
 		const top_card = game.table.cards[game.table.cards.length - 1];
-		const hand_embed = new EmbedBuilder()
+		const hand_embed = GameEmbeds.defaultEmbed(game)
 			.setAuthor({
 				name: author.displayName,
 				iconURL: author.avatarURL(),
 			})
 			.setDescription(player_hand.join(`\n`))
-			.setColor(parseInt(embed_colors[top_card.color], 16))
-			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-					top_card.color
-				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-			)
-			.setFooter({
-				text: `${player.hand.length} cards | Current card: ${
-					display_names[top_card.color]
-				} ${top_card.icon}`,
-			});
 		try {
 			await author.send({ embeds: [hand_embed] });
 		} catch {

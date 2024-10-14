@@ -9,39 +9,13 @@ function shuffleArray(array) {
 	return array;
 }
 const {
-	EmbedBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	ActionRowBuilder,
+	EmbedBuilder
 } = require("discord.js");
+const InputProcessor = require("../structures/input-processor");
+const GameEmbeds = require("../structures/embeds");
 const db = new QuickDB();
 const games = db.table("games");
-const hand_button = new ButtonBuilder()
-	.setCustomId(`hand`)
-	.setStyle(ButtonStyle.Primary)
-	.setLabel(`Hand`)
-	.setEmoji(`🎴`);
-const table_button = new ButtonBuilder()
-	.setCustomId(`table`)
-	.setStyle(ButtonStyle.Secondary)
-	.setLabel(`Table`)
-	.setEmoji(`🎨`);
-const history_button = new ButtonBuilder()
-	.setCustomId(`history`)
-	.setStyle(ButtonStyle.Success)
-	.setLabel(`History`)
-	.setEmoji(`🔄`);
-const stats_button = new ButtonBuilder()
-	.setCustomId(`stats`)
-	.setStyle(ButtonStyle.Success)
-	.setLabel(`Stats`)
-	.setEmoji(`📊`);
-const button_row = new ActionRowBuilder().setComponents([
-	hand_button,
-	table_button,
-	history_button,
-	stats_button,
-]);
+const button_row = require("../structures/button-row")
 module.exports = {
 	name: `play`,
 	aliases: [`p`],
@@ -64,20 +38,8 @@ module.exports = {
 					game.players[current_turn].chain + 1;
 			}
 		};
-		if (game.processing) {
+		if (!(await InputProcessor.turnCheck(game, message))) {
 			return;
-		}
-		if (!on) {
-			return await message.reply(`The game has not started yet!`);
-		}
-		if (author.id != players[0].id && author.id != players[1].id) {
-			return await message.reply(`You're not in the game!`);
-		}
-		if (
-			(current_turn == 0 && author.id != players[0].id) ||
-			(current_turn == 1 && author.id != players[1].id)
-		) {
-			return await message.reply(`It's not your turn yet!`);
 		}
 		const users = [];
 		for (const p of players) {
@@ -353,30 +315,7 @@ module.exports = {
 				player: game.players[current_turn].name,
 				top_card,
 			});
-			const play_embed = new EmbedBuilder()
-				.setDescription(
-					`A **${display_names[top_card.color]} ${
-						top_card.wild ? `WILD` : ``
-					}${
-						top_card.icon
-					}** has been played. ${extra}\n\nIt is now ${
-						game.players[game.table.current_turn].name
-					}'s turn!`
-				)
-				.setColor(parseInt(embed_colors[top_card.color], 16))
-				.setThumbnail(
-					`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-						top_card.color
-					}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-				)
-				.setFooter({
-					iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
-					text: `Deck: ${
-						game.deck.length
-					} cards remaining | Discarded: ${
-						game.table.cards.length
-					}`,
-				});
+			const play_embed = GameEmbeds.playEmbed(game, extra)
 			await channel.send({
 				embeds: [play_embed],
 				components: [button_row],
@@ -427,63 +366,9 @@ module.exports = {
 						? `${names[0]} HAS WON THE SERIES! (${game.players[0].wins}-${game.players[1].wins})`
 						: `${names[1]} HAS WON THE SERIES! (${game.players[1].wins}-${game.players[0].wins})`
 					: `Current Match Statistics`;
-				const stats_embed = new EmbedBuilder()
+				const stats_embed = GameEmbeds.statsEmbed(game)
 					.setTitle(final_embed_title)
 					.setDescription(`${scoreboard}`)
-					.addFields(
-						{
-							name: `🎴 Cards Played`,
-							value: `${names[0]} - ${game.players[0].stats.cards_played}\n${names[1]} - ${game.players[1].stats.cards_played}`,
-							inline: true,
-						},
-						{
-							name: `🏁 WILDs Played`,
-							value: `${names[0]} - ${game.players[0].stats.wilds_played}\n${names[1]} - ${game.players[1].stats.wilds_played}`,
-							inline: true,
-						},
-						{
-							inline: true,
-							name: `⏭️ WILD +4s Played`,
-							value: `${names[0]} - ${game.players[0].stats.plus_4s_played}\n${names[1]} - ${game.players[1].stats.plus_4s_played}`,
-						},
-						{
-							name: `🔃 Reverses Played`,
-							value: `${names[0]} - ${game.players[0].stats.reverses_played}\n${names[1]} - ${game.players[1].stats.reverses_played}`,
-							inline: true,
-						},
-						{
-							inline: true,
-							name: `🚫 Skips Played`,
-							value: `${names[0]} - ${game.players[0].stats.skips_played}\n${names[1]} - ${game.players[1].stats.skips_played}`,
-						},
-						{
-							inline: true,
-							name: `⏩ +2s Played`,
-							value: `${names[0]} - ${game.players[0].stats.plus_2s_played}\n${names[1]} - ${game.players[1].stats.plus_2s_played}`,
-						},
-
-						{
-							inline: true,
-							name: `♻️ Times Switched Color`,
-							value: `${names[0]} - ${game.players[0].stats.times_switched_color}\n${names[1]} - ${game.players[1].stats.times_switched_color}`,
-						},
-						{
-							inline: true,
-							name: `🫳 Cards Drawn`,
-							value: `${names[0]} - ${game.players[0].stats.cards_drawn}\n${names[1]} - ${game.players[1].stats.cards_drawn}`,
-						},
-						{
-							inline: true,
-							name: `🫱 Cards Self-Drawn`,
-							value: `${names[0]} - ${game.players[0].stats.self_cards_drawn}\n${names[1]} - ${game.players[1].stats.self_cards_drawn}`,
-						},
-						{
-							inline: true,
-							name: `⛓️ Longest Card Chain`,
-							value: `${names[0]} - ${game.players[0].stats.longest_chain}\n${names[1]} - ${game.players[1].stats.longest_chain}`,
-						}
-					)
-					.setColor(parseInt(embed_colors[top_card.color], 16))
 					.setThumbnail(users[current_turn].avatarURL())
 					.setFooter({
 						text: match_is_finished
@@ -528,24 +413,7 @@ module.exports = {
 					amount;
 				game.table.current_turn++;
 				game.table.current_turn %= 2;
-				const pp_embed = new EmbedBuilder()
-					.setDescription(
-						`**POWER PLAY!!** ${
-							game.players[1 - current_turn].name
-						} drew a card. ${extra}\n\nIt is now ${
-							game.players[game.table.current_turn].name
-						}'s turn!`
-					)
-					.setColor(parseInt(embed_colors[top_card.color], 16))
-					.setThumbnail(
-						`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-							top_card.color
-						}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-					)
-					.setFooter({
-						iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
-						text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
-					});
+				const pp_embed = GameEmbeds.ppEmbed(game)
 				game.powerplay = undefined;
 				await channel.send({
 					embeds: [pp_embed],

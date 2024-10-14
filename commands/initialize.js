@@ -22,8 +22,14 @@ module.exports = {
 			viewers_see_table: true,
 			players_see_history: true,
 			custom_cards: true,
+			theme: `default`,
 		};
-		Object.assign(settings, await setting.get(message.channel.id));
+		let obtained_settings = await setting.get(message.guildId)
+		if (!obtained_settings) {
+			console.warn("Couldn't find the settings, or still using old setup! Make sure to reinstall the server.")
+			obtained_settings = await setting.get(message.channel.id)
+		}
+		Object.assign(settings, obtained_settings);
 		const stats = {
 			cards_played: 0,
 			plus_4s_played: 0,

@@ -1,73 +1,14 @@
-const { QuickDB } = require("quick.db");
-const { display_names, embed_colors } = require("../enums.json");
-const {
-	EmbedBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	ActionRowBuilder,
-} = require("discord.js");
-const db = new QuickDB();
-const games = db.table("games");
+const GameEmbeds = require("../structures/embeds");
+const button_row = require("../structures/button-row")
 module.exports = {
 	name: `table`,
 	aliases: [`t`],
 	async execute(message, game) {
-		const { author, channel } = message;
-		const { on, table, deck, players } = game;
-		const { cards, current_turn } = table;
+		const { on } = game;
 		if (!on) {
 			return;
 		}
-		const top_card = cards[cards.length - 1];
-		const table_embed = new EmbedBuilder()
-			.setDescription(
-				`It's currently ${
-					players[current_turn].name
-				}'s turn. The current card is **${
-					display_names[top_card.color]
-				} ${top_card.icon}**.\n\n${players[0].name} - **${
-					players[0].hand.length
-				} cards**\n${players[1].name} - **${
-					players[1].hand.length
-				} cards**`
-			)
-			.setColor(parseInt(embed_colors[top_card.color], 16))
-			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/${
-					top_card.color
-				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-			)
-			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.custom_cards ? `custom-cards` : `default-cards`}/logo.png`,
-				text: `Deck: ${game.deck.length} cards remaining | Discarded: ${game.table.cards.length}`,
-			});
-		const hand_button = new ButtonBuilder()
-			.setCustomId(`hand`)
-			.setStyle(ButtonStyle.Primary)
-			.setLabel(`Hand`)
-			.setEmoji(`🎴`);
-		const table_button = new ButtonBuilder()
-			.setCustomId(`table`)
-			.setStyle(ButtonStyle.Secondary)
-			.setLabel(`Table`)
-			.setEmoji(`🎨`);
-		const history_button = new ButtonBuilder()
-			.setCustomId(`history`)
-			.setStyle(ButtonStyle.Success)
-			.setLabel(`History`)
-			.setEmoji(`🔄`);
-		const stats_button = new ButtonBuilder()
-			.setCustomId(`stats`)
-			.setStyle(ButtonStyle.Success)
-			.setLabel(`Stats`)
-			.setEmoji(`📊`);
-
-		const button_row = new ActionRowBuilder().setComponents([
-			hand_button,
-			table_button,
-			history_button,
-			stats_button,
-		]);
+		const table_embed = GameEmbeds.tableEmbed(game)
 		return await message.reply({
 			embeds: [table_embed],
 			components: [button_row],
