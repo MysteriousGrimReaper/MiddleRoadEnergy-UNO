@@ -45,7 +45,7 @@ module.exports = class GameEmbeds {
 			}'s turn!`
 		)
 	}
-	static ppEmbed(game) {
+	static ppEmbed(game, extra = "") {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];

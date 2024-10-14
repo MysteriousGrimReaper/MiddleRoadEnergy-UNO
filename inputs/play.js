@@ -1,6 +1,7 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
-const { base, large } = require("../deck.json");
+let { deck } = require("../config.json") ?? `base`
+const decks = require("../deck.json");
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -335,7 +336,7 @@ module.exports = {
 				while (game.table.cards.length > 0) {
 					game.deck.push(game.table.cards.pop());
 				}
-				game.deck = shuffleArray(base);
+				game.deck = shuffleArray(decks[deck]);
 				game.on = false;
 				game.log[game.matches_finished].end = Date.now();
 				game.log[game.matches_finished].winner = current_turn;
@@ -413,7 +414,7 @@ module.exports = {
 					amount;
 				game.table.current_turn++;
 				game.table.current_turn %= 2;
-				const pp_embed = GameEmbeds.ppEmbed(game)
+				const pp_embed = GameEmbeds.ppEmbed(game, extra)
 				game.powerplay = undefined;
 				await channel.send({
 					embeds: [pp_embed],
