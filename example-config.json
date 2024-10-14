@@ -1,0 +1,7 @@
+{
+    "testToken": "<put testing bot token here> (ignore for production)",
+    "token": "<put bot token here>",
+    "test": false,
+    "prefix": "uno",
+    "ref_prefix": "ref"
+}

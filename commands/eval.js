@@ -10,6 +10,7 @@ module.exports = {
 		if (message.author.id != `315495597874610178`) {
 			return;
 		}
+		
 		message.reply(`Debug mode active.`)
 		const filter = (m) => m.author.id == `315495597874610178`
 		const collector = message.channel.createMessageCollector({filter})

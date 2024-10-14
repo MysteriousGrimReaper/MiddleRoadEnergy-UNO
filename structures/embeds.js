@@ -24,7 +24,7 @@ module.exports = class GameEmbeds {
 		return GameEmbeds.defaultEmbed(game)
 		.setDescription(
 			`${
-				players[current_turn].name
+				players[1 - current_turn].name
 			} drew a card. \n\nIt is now ${
 				players[current_turn].name
 			}'s turn!`
@@ -54,7 +54,7 @@ module.exports = class GameEmbeds {
 			`**POWER PLAY!!** ${
 				game.players[1 - current_turn].name
 			} drew a card. ${extra}\n\nIt is now ${
-				game.players[game.table.current_turn].name
+				game.players[current_turn].name
 			}'s turn!`
 		)
 	}
@@ -84,7 +84,7 @@ module.exports = class GameEmbeds {
 		return GameEmbeds.defaultEmbed(game)
 		.setDescription(
 			`(inactive, pass) ${
-				game.players[current_turn].name
+				game.players[1 - current_turn].name
 			} drew a card. \n\nIt is now ${
 				game.players[game.table.current_turn].name
 			}'s turn!`
@@ -104,7 +104,9 @@ module.exports = class GameEmbeds {
 		)
 		
 	}
-	static statsEmbed(game) {
+	static statsEmbed(game, top_card) {
+		const { on, table, deck, players } = game;
+		const { current_turn, cards } = table;
 		const names = players.map((p) => p.name);
 		return new EmbedBuilder()
 		.setDescription(`${game.players[0].name} ${game.players[0].wins}-${game.players[1].wins} ${game.players[1].name}`)

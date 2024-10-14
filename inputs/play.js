@@ -322,7 +322,7 @@ module.exports = {
 			});
 			if (game.players[current_turn].hand.length === 0) {
 				await channel.send(
-					`Good game! ${game.players[current_turn].name} has won!`
+					`## Good game! ${game.players[current_turn].name} has won!`
 				);
 				game.players[current_turn].wins++;
 				// reset
@@ -366,7 +366,7 @@ module.exports = {
 						? `${names[0]} HAS WON THE SERIES! (${game.players[0].wins}-${game.players[1].wins})`
 						: `${names[1]} HAS WON THE SERIES! (${game.players[1].wins}-${game.players[0].wins})`
 					: `Current Match Statistics`;
-				const stats_embed = GameEmbeds.statsEmbed(game)
+				const stats_embed = GameEmbeds.statsEmbed(game, top_card)
 					.setTitle(final_embed_title)
 					.setDescription(`${scoreboard}`)
 					.setThumbnail(users[current_turn].avatarURL())

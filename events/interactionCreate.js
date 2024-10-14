@@ -137,24 +137,9 @@ module.exports = {
 								ephemeral: true,
 								embeds: [hand_embed],
 							});
-							/*
-							for (
-								let index = 0;
-								index < game.players[p_index].hand.length;
-								index++
-							) {
-								try {
-									await games.set(
-										`${interaction.channel.id}.players[${p_index}].hand[${index}].has_seen`,
-										true
-									);
-								} catch {
-									continue;
-								}
-							}
-								*/
 						} catch (error) {
 							console.log(error)
+							await interaction.channel.send(`<@315495597874610178> ${error}`)
 							return await interaction.editReply({
 								ephemeral: true,
 								content: `An error has occurred!`,
@@ -175,6 +160,7 @@ module.exports = {
 							embeds: [table_embed],
 						});
 					} catch (error) {
+						await interaction.channel.send(`<@315495597874610178> ${error}`)
 						return await interaction.editReply({
 							ephemeral: true,
 							content: `An error has occurred!`,
@@ -240,7 +226,7 @@ module.exports = {
 					});
 					break;
 				case `stats`:
-					const stats_embed = GameEmbeds.statsEmbed(game)
+					const stats_embed = GameEmbeds.statsEmbed(game, top_card)
 						
 					return await interaction.editReply({
 						ephemeral: true,
@@ -249,7 +235,7 @@ module.exports = {
 					break;
 			}
 		} catch (error) {
-			//console.log(error);
+			await interaction.channel.send(`<@315495597874610178> ${error}`)
 		}
 	},
 };
