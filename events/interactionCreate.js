@@ -20,7 +20,7 @@ module.exports = {
 			console.log(`The interaction thing failed again....`);
 			console.log(error);
 			console.log(interaction);
-			await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
+			await (await interaction.client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
 			return;
 		}
 		//console.log(`reply deferred`);
