@@ -1,7 +1,9 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
-let { deck } = require("../config.json") ?? `base`
+let { deck } = require("../config.json")
+deck ??= `base`
 const decks = require("../deck.json");
+const deck_to_use = decks[deck]
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -336,7 +338,7 @@ module.exports = {
 				while (game.table.cards.length > 0) {
 					game.deck.push(game.table.cards.pop());
 				}
-				game.deck = shuffleArray(decks[deck]);
+				game.deck = shuffleArray(deck_to_use);
 				game.on = false;
 				game.log[game.matches_finished].end = Date.now();
 				game.log[game.matches_finished].winner = current_turn;

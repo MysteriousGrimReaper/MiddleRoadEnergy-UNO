@@ -5,13 +5,12 @@ module.exports = class GameEmbeds {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
+		const card_image_link = `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.theme}-cards/${
+					top_card.color != `WILD` ? top_card.color : ``
+				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
         return new EmbedBuilder()
 			.setColor(parseInt(embed_colors[top_card.color], 16))
-			.setThumbnail(
-				`https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.theme}-cards/${
-					top_card.wild ? `` : top_card.color
-				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
-			)
+			.setThumbnail(card_image_link)
 			.setFooter({
 				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.theme}-cards/logo.png`,
 				text: `Deck: ${deck.length} cards remaining | Discarded: ${cards.length}`,

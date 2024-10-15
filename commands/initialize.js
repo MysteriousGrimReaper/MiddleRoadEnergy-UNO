@@ -1,6 +1,8 @@
 const { QuickDB } = require("quick.db");
-let { deck } = require("../config.json") ?? `base`
+let { deck } = require("../config.json")
+deck ??= `base`
 const decks = require("../deck.json");
+const deck_to_use = decks[deck]
 const db = new QuickDB();
 const games = db.table("games");
 const setting = db.table("settings");
@@ -96,7 +98,7 @@ module.exports = {
 				cards: [],
 				current_turn: 0,
 			},
-			deck: shuffleArray(decks[deck]), // SWITCH THIS BACK TO base
+			deck: shuffleArray(deck_to_use), // SWITCH THIS BACK TO base
 			settings,
 			players: [
 				{

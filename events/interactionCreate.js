@@ -14,12 +14,13 @@ module.exports = {
 		//console.log(`interaction created`);
 
 		try {
-			//console.log(`deferring reply`);
+			// console.log(`deferring reply`);
 			await interaction.deferReply({ ephemeral: true });
 		} catch (error) {
 			console.log(`The interaction thing failed again....`);
 			console.log(error);
 			console.log(interaction);
+			await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
 			return;
 		}
 		//console.log(`reply deferred`);
