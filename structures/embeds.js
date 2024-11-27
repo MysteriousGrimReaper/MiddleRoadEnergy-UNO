@@ -12,7 +12,7 @@ module.exports = class GameEmbeds {
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(card_image_link)
 			.setFooter({
-				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/${game.settings.theme}-cards/logo.png`,
+				iconURL: `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/default/logo.png`,
 				text: `Deck: ${deck.length} cards remaining | Discarded: ${cards.length}`,
 			});
 	}
