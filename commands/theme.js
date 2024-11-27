@@ -2,11 +2,12 @@ const { QuickDB } = require("quick.db");
 
 const db = new QuickDB();
 const setting = db.table("settings");
-const themes = [`default`, `custom`, `greek`]
+const fs = require("fs")
+const themes = fs.readdirSync(`./cards`)
 module.exports = {
 	name: `theme`,
 	aliases: [`th`],
-	description: `Pause a game occurring in the channel. The game will still be ongoing, but players cannot send inputs.`,
+	description: `Set the card theme.`,
 	async execute(message) {
 		const theme_chosen = message.content.split(' ')[2]
 		if (themes.includes(theme_chosen)) {
