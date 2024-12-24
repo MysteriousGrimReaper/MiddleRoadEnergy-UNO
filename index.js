@@ -28,6 +28,14 @@ const {
 	Partials,
 	PermissionsBitField,
 } = require("discord.js");
+if (!fs.readdirSync("./").includes("config.json")) {
+	fs.writeFileSync("./config.json", `{
+	"token": "PASTE_YOUR_BOT_TOKEN_HERE",
+	"prefix": "uno",
+	"ref_prefix": "ref"
+}`)
+		throw Error("config.json file just made. Please open config.json and paste your bot token in there as indicated.")
+}
 const { testToken, token, test, prefix, ref_prefix } = require("./config.json");
 const client = new Client({
 	intents: [
@@ -197,13 +205,22 @@ async function cacheInitialize() {
 	});
 }
 cacheInitialize();
+try {
+	client.login(test ? testToken : token);
+	const yourUserId = "315495597874610178";
+	const user = client.users.fetch(yourUserId);
+	process.on("uncaughtException", async (error) => {
+		console.log(error)
+		try {
+			await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
+		}
+		catch {
+			console.log(`Couldn't send the error to MGR. Please check the logs above to see if there were any other errors.`)
+		}
+	});
+}
+catch {
+	console.log("Invalid token. Please make sure there are no errors in the config.json file.")
+}
 
-client.login(test ? testToken : token);
-
-const yourUserId = "315495597874610178";
-const user = client.users.fetch(yourUserId);
-process.on("uncaughtException", async (error) => {
-	console.log(error)
-	await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
-});
 
