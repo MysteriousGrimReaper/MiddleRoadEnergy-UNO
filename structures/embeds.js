@@ -2,10 +2,30 @@ const { EmbedBuilder } = require("discord.js");
 const { display_names, embed_colors } = require("../enums.json");
 const { Catbox } = require('node-catbox');
 const catbox = new Catbox();
+const {QuickDB} = require("quick.db");
+const db = new QuickDB();
+const card_link_db = db.table("card_links");
 const card_url_cache = {}
 module.exports = class GameEmbeds {
-	static async getCardImageLink(game, card) {
-		const card_image_link = `cards/${game.settings.theme}/${
+	static async loadCardLinks(theme) {
+		const card_links = await card_link_db.get(theme) ?? {};
+		for (const link in card_links) {
+			if (!card_links[link]) {
+				try {
+					const response = await catbox.uploadFile({
+						path: card_image_link
+					});
+					card_url_cache[card_image_link] = response;
+				} catch (err) {
+					console.error(err); // -> error message from server
+				}
+			}
+			card_url_cache[link] = card_links[link];
+		}
+		await card_link_db.set(theme, card_url_cache);
+	}
+	static async getCardImageLink(theme, card) {
+		const card_image_link = `cards/${theme}/${
 			card.color != `WILD` ? card.color : ``
 		}${card.wild ? `WILD` : ``}${card.icon}.png`;
 		if (card_url_cache[card_image_link]) {
@@ -28,7 +48,7 @@ module.exports = class GameEmbeds {
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
 
-		const card_image_link = await GameEmbeds.getCardImageLink(game, top_card);
+		const card_image_link = await GameEmbeds.getCardImageLink(game.settings.theme, top_card);
         return new EmbedBuilder()
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(card_image_link)

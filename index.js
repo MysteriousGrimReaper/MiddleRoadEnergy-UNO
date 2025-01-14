@@ -87,6 +87,7 @@ for (const file of inputFiles) {
 const input_queue = [];
 let is_processing_commands = false;
 const uno_message_listener = async (m) => {
+	try {
 	if (m.author.bot || !m.content.toLowerCase().startsWith(prefix)) {
 		return;
 	}
@@ -143,6 +144,12 @@ const uno_message_listener = async (m) => {
 		input_queue.shift();
 		is_processing_commands = false;
 	}
+	}
+	catch (error) { 
+		if (error instanceof ConnectTimeoutError) {
+			message.reply(`The request timed out, please try again.`)
+		}
+	}
 };
 client.on("messageCreate", uno_message_listener);
 
@@ -161,42 +168,50 @@ for (const file of commandFiles) {
 		names.push(...aliases);
 	}
 	client.on("messageCreate", (message) => {
-		let { content } = message;
-		content = content.toLowerCase();
-		if (
-			!message.inGuild() ||
-			message.author.bot ||
-			!content.startsWith(ref_prefix)
-		) {
-			return;
+		try {
+			let { content } = message;
+			content = content.toLowerCase();
+			if (
+				!message.inGuild() ||
+				message.author.bot ||
+				!content.startsWith(ref_prefix)
+			) {
+				return;
+			}
+			const practice_channel_ids = [
+				`1110377721877499974`,
+				`967583535290548244`,
+				`1209164498624319518`,
+				`1209164739125710868`,
+				`1217987116521226250`,
+				`1217987181768081489`,
+				`1217987181768081489`,
+				`1273424231782158409`,
+				`1273424302858829896`,
+			]
+			if (!message?.member?.permissions.has(
+				PermissionsBitField.Flags.ManageRoles
+			) && !practice_channel_ids.includes(message.channel.id)) {
+				return
+			}
+			const a = content.split(` `);
+			if (
+				names.reduce(
+					(acc, cv) => acc || a[0] == `${ref_prefix}${cv}`,
+					false
+				)
+			) {
+				execute(message, ...a.slice(1));
+			} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
+				execute(message, ...a.slice(2));
+			}
 		}
-		const practice_channel_ids = [
-			`1110377721877499974`,
-			`967583535290548244`,
-			`1209164498624319518`,
-			`1209164739125710868`,
-			`1217987116521226250`,
-			`1217987181768081489`,
-			`1217987181768081489`,
-			`1273424231782158409`,
-			`1273424302858829896`,
-		]
-		if (!message?.member?.permissions.has(
-			PermissionsBitField.Flags.ManageRoles
-		) && !practice_channel_ids.includes(message.channel.id)) {
-			return
+		catch (error) {
+			if (error instanceof ConnectTimeoutError) {
+				message.reply(`The request timed out, please try again.`)
+			}
 		}
-		const a = content.split(` `);
-		if (
-			names.reduce(
-				(acc, cv) => acc || a[0] == `${ref_prefix}${cv}`,
-				false
-			)
-		) {
-			execute(message, ...a.slice(1));
-		} else if (names.reduce((acc, cv) => acc || a[1] == cv, false)) {
-			execute(message, ...a.slice(2));
-		}
+		
 	});
 }
 async function cacheInitialize() {
@@ -210,7 +225,10 @@ client.login(test ? testToken : token);
 
 const yourUserId = "315495597874610178";
 process.on("uncaughtException", async (error) => {
-	console.log(error)
+	if (error instanceof ConnectTimeoutError) {
+		return; 
+	}
+	console.error(error)
 	await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
 });
 

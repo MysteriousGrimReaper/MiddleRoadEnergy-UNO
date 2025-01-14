@@ -15,7 +15,6 @@ module.exports = {
 			.filter((a) => {
 				return a != `ref` && a != `toggle` && a != `reftoggle`;
 			});
-		console.log(c);
 		const valid_toggles = [
 			`max_command_chain`,
 			`viewers_see_history`,

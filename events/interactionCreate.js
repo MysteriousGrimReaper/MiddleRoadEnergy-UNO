@@ -17,10 +17,6 @@ module.exports = {
 			// console.log(`deferring reply`);
 			await interaction.deferReply({ ephemeral: true });
 		} catch (error) {
-			console.log(`The interaction thing failed again....`);
-			console.log(error);
-			console.log(interaction);
-			await (await interaction.client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
 			return;
 		}
 		//console.log(`reply deferred`);
@@ -139,7 +135,7 @@ module.exports = {
 								embeds: [hand_embed],
 							});
 						} catch (error) {
-							console.log(error)
+							console.error(error)
 							await interaction.channel.send(`<@315495597874610178> ${error}`)
 							return await interaction.editReply({
 								ephemeral: true,
@@ -161,7 +157,7 @@ module.exports = {
 							embeds: [table_embed],
 						});
 					} catch (error) {
-						console.log(error)
+						console.error(error)
 						await interaction.channel.send(`<@315495597874610178> ${error}`)
 						return await interaction.editReply({
 							ephemeral: true,
@@ -170,9 +166,6 @@ module.exports = {
 					}
 					break;
 				case `history`:
-					console.log(is_ref)
-					console.log((is_player && game?.settings?.players_see_history))
-					console.log(game.settings.viewers_see_history)
 					if (!can_view_history) {
 						return await interaction.editReply({
 							ephemeral: true,
