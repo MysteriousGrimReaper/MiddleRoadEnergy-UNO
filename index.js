@@ -28,6 +28,14 @@ const {
 	Partials,
 	PermissionsBitField,
 } = require("discord.js");
+if (!fs.readdirSync("./").includes("config.json")) {
+	fs.writeFileSync("./config.json", `{
+	"token": "PASTE_YOUR_BOT_TOKEN_HERE",
+	"prefix": "uno",
+	"ref_prefix": "ref"
+}`)
+		throw Error("config.json file just made. Please open config.json and paste your bot token in there as indicated.")
+}
 const { testToken, token, test, prefix, ref_prefix } = require("./config.json");
 const client = new Client({
 	intents: [
