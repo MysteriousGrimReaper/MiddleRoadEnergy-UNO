@@ -47,7 +47,7 @@ module.exports = {
 		game.players[current_turn].stats.cards_drawn += amount;
 		game.table.current_turn = 1 - current_turn;
 		const top_card = game.table.cards[game.table.cards.length - 1];
-		const play_embed = GameEmbeds.passEmbed(game)
+		const play_embed = await GameEmbeds.passEmbed(game)
 		await channel.send({ embeds: [play_embed], components: [button_row] });
 
 		if (game.powerplay && current_turn != game.table.current_turn) {
@@ -68,7 +68,7 @@ module.exports = {
 			game.players[game.table.current_turn].stats.cards_drawn += amount;
 			game.table.current_turn++;
 			game.table.current_turn %= 2;
-			const pp_embed = GameEmbeds.ppEmbed(game)
+			const pp_embed = await GameEmbeds.ppEmbed(game)
 			game.powerplay = undefined;
 			await channel.send({
 				embeds: [pp_embed],

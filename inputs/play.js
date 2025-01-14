@@ -318,7 +318,7 @@ module.exports = {
 				player: game.players[current_turn].name,
 				top_card,
 			});
-			const play_embed = GameEmbeds.playEmbed(game, extra)
+			const play_embed = await GameEmbeds.playEmbed(game, extra)
 			await channel.send({
 				embeds: [play_embed],
 				components: [button_row],
@@ -369,7 +369,7 @@ module.exports = {
 						? `${names[0]} HAS WON THE SERIES! (${game.players[0].wins}-${game.players[1].wins})`
 						: `${names[1]} HAS WON THE SERIES! (${game.players[1].wins}-${game.players[0].wins})`
 					: `Current Match Statistics`;
-				const stats_embed = GameEmbeds.statsEmbed(game, top_card)
+				const stats_embed = (await GameEmbeds.statsEmbed(game, top_card))
 					.setTitle(final_embed_title)
 					.setDescription(`${scoreboard}`)
 					.setThumbnail(users[current_turn].avatarURL())
@@ -416,7 +416,7 @@ module.exports = {
 					amount;
 				game.table.current_turn++;
 				game.table.current_turn %= 2;
-				const pp_embed = GameEmbeds.ppEmbed(game, extra)
+				const pp_embed = await GameEmbeds.ppEmbed(game, extra)
 				game.powerplay = undefined;
 				await channel.send({
 					embeds: [pp_embed],

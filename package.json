@@ -19,7 +19,9 @@
   "homepage": "https://github.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO#readme",
   "dependencies": {
     "better-sqlite3": "^10.0.0",
+    "decompress": "^4.2.1",
     "discord.js": "^14.15.2",
+    "node-catbox": "^3.3.0",
     "quick.db": "^9.1.7"
   },
   "devDependencies": {

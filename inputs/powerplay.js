@@ -86,7 +86,7 @@ module.exports = {
 			game.table.current_turn %= 2;
 			game.powerplay = undefined;
 			const top_card = game.table.cards[game.table.cards.length - 1];
-			const play_embed = GameEmbeds.ppEmbed(game)
+			const play_embed = await GameEmbeds.ppEmbed(game)
 			await channel.send({
 				embeds: [play_embed],
 				components: [button_row],

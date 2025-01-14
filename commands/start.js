@@ -53,7 +53,7 @@ module.exports = {
 			winner: undefined,
 			cards: starting_cards,
 		});
-		const play_embed = GameEmbeds.startEmbed(game)
+		const play_embed = await GameEmbeds.startEmbed(game)
 		await channel.send({
 			embeds: [play_embed],
 			components: [button_row],

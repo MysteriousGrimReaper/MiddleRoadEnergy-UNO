@@ -1,13 +1,34 @@
 const { EmbedBuilder } = require("discord.js");
 const { display_names, embed_colors } = require("../enums.json");
+const { Catbox } = require('node-catbox');
+const catbox = new Catbox();
+const card_url_cache = {}
 module.exports = class GameEmbeds {
-	static defaultEmbed(game) {
+	static async getCardImageLink(game, card) {
+		const card_image_link = `cards/${game.settings.theme}/${
+			card.color != `WILD` ? card.color : ``
+		}${card.wild ? `WILD` : ``}${card.icon}.png`;
+		if (card_url_cache[card_image_link]) {
+			return card_url_cache[card_image_link]
+		}
+		try {
+			const response = await catbox.uploadFile({
+				path: card_image_link
+			});
+			card_url_cache[card_image_link] = response;
+		} catch (err) {
+			console.error(err); // -> error message from server
+		}
+		return card_url_cache[card_image_link] ?? `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/default/${
+					card.color != `WILD` ? card.color : ``
+				}${card.wild ? `WILD` : ``}${card.icon}.png`
+	}
+	static async defaultEmbed(game) {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		const card_image_link = `https://raw.githubusercontent.com/MysteriousGrimReaper/MiddleRoadEnergy-UNO/main/cards/${game.settings.theme}/${
-					top_card.color != `WILD` ? top_card.color : ``
-				}${top_card.wild ? `WILD` : ``}${top_card.icon}.png`
+
+		const card_image_link = await GameEmbeds.getCardImageLink(game, top_card);
         return new EmbedBuilder()
 			.setColor(parseInt(embed_colors[top_card.color], 16))
 			.setThumbnail(card_image_link)
@@ -16,11 +37,11 @@ module.exports = class GameEmbeds {
 				text: `Deck: ${deck.length} cards remaining | Discarded: ${cards.length}`,
 			});
 	}
-    static drawEmbed(game) {
+    static async drawEmbed(game) {
         const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		return GameEmbeds.defaultEmbed(game)
+		return (await GameEmbeds.defaultEmbed(game))
 		.setDescription(
 			`${
 				players[1 - current_turn].name
@@ -29,11 +50,11 @@ module.exports = class GameEmbeds {
 			}'s turn!`
 		)
     }
-	static playEmbed(game, extra) {
+	static async playEmbed(game, extra) {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		return GameEmbeds.defaultEmbed(game)
+		return (await GameEmbeds.defaultEmbed(game))
 		.setDescription(
 			`A **${display_names[top_card.color]} ${
 				top_card.wild ? `WILD` : ``
@@ -44,11 +65,11 @@ module.exports = class GameEmbeds {
 			}'s turn!`
 		)
 	}
-	static ppEmbed(game, extra = "") {
+	static async ppEmbed(game, extra = "") {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		return GameEmbeds.defaultEmbed(game)
+		return (await GameEmbeds.defaultEmbed(game))
 		.setDescription(
 			`**POWER PLAY!!** ${
 				game.players[1 - current_turn].name
@@ -57,11 +78,11 @@ module.exports = class GameEmbeds {
 			}'s turn!`
 		)
 	}
-	static tableEmbed(game) {
+	static async tableEmbed(game) {
         const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		return GameEmbeds.defaultEmbed(game)
+		return (await GameEmbeds.defaultEmbed(game))
 		.setDescription(
 			`It's currently ${
 				players[current_turn].name
@@ -76,11 +97,11 @@ module.exports = class GameEmbeds {
 			} cards | ${players[1].pp} PP**`
 		)
     }
-	static passEmbed(game) {
+	static async passEmbed(game) {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
-		return GameEmbeds.defaultEmbed(game)
+		return (await GameEmbeds.defaultEmbed(game))
 		.setDescription(
 			`(inactive, pass) ${
 				game.players[1 - current_turn].name
@@ -89,13 +110,13 @@ module.exports = class GameEmbeds {
 			}'s turn!`
 		)
 	}
-	static startEmbed(game) {
+	static async startEmbed(game) {
 		const { on, table, deck, players } = game;
 		const { current_turn, cards } = table;
         const top_card = cards[cards.length - 1];
 		const starting_cards = game.cards;
 		const player1 = `${game.players[game.table.current_turn].name}`;
-		return GameEmbeds.defaultEmbed(game)
+		return (await GameEmbeds.defaultEmbed(game))
 		.setDescription(
 			`Starting UNO game with ${starting_cards} cards! The currently flipped card is:\n**${
 				display_names[top_card.color]

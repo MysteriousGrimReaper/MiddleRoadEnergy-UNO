@@ -126,7 +126,7 @@ module.exports = {
 									}${italicize(cv) ? `__` : ``}`,
 								``
 							);
-							const hand_embed = GameEmbeds.defaultEmbed(game)
+							const hand_embed = (await GameEmbeds.defaultEmbed(game))
 								.setAuthor({
 									name: author.displayName,
 									iconURL: author.avatarURL(),
@@ -155,12 +155,13 @@ module.exports = {
 								content: `Sorry, you can't view the table!`,
 							});
 						}
-						const table_embed = GameEmbeds.tableEmbed(game)
+						const table_embed = await GameEmbeds.tableEmbed(game)
 						return await interaction.editReply({
 							ephemeral: true,
 							embeds: [table_embed],
 						});
 					} catch (error) {
+						console.log(error)
 						await interaction.channel.send(`<@315495597874610178> ${error}`)
 						return await interaction.editReply({
 							ephemeral: true,
@@ -216,7 +217,7 @@ module.exports = {
 						)
 						.join(` | `);
 
-					const history_embed = GameEmbeds.defaultEmbed(game)
+					const history_embed = (await GameEmbeds.defaultEmbed(game))
 						.setTitle(
 							`${cards_played} cards have been played since the last shuffle. Card history is as follows:`
 						)

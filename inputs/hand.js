@@ -21,7 +21,7 @@ module.exports = {
 			.map((card) => `- ${display_names[card.color]} ${card.icon}`)
 			.sort();
 		const top_card = game.table.cards[game.table.cards.length - 1];
-		const hand_embed = GameEmbeds.defaultEmbed(game)
+		const hand_embed = (await GameEmbeds.defaultEmbed(game))
 			.setAuthor({
 				name: author.displayName,
 				iconURL: author.avatarURL(),

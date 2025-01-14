@@ -8,7 +8,7 @@ module.exports = {
 		if (!on) {
 			return;
 		}
-		const table_embed = GameEmbeds.tableEmbed(game)
+		const table_embed = await GameEmbeds.tableEmbed(game)
 		return await message.reply({
 			embeds: [table_embed],
 			components: [button_row],

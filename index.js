@@ -201,7 +201,6 @@ cacheInitialize();
 client.login(test ? testToken : token);
 
 const yourUserId = "315495597874610178";
-const user = client.users.fetch(yourUserId);
 process.on("uncaughtException", async (error) => {
 	console.log(error)
 	await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
