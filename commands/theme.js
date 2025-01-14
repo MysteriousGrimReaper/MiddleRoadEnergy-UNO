@@ -30,7 +30,7 @@ module.exports = {
 	async execute(message) {
 		const args = message.content.split(' ')
 		if (args.length < 3) {
-			await message.reply(`You need to specify a command. Your choices are: ${'`set`'}`)
+			return await message.reply(`You need to specify a command. Your choices are: ${'`set` `add` `remove`'}`)
 		}
 		switch (args[2]) {
 			case `set`:
