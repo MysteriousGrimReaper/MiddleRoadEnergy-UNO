@@ -87,7 +87,7 @@ module.exports = {
 				}
 				break
 			default:
-				await message.reply(`Invalid command. Your choices are: ${'`set`'}`)
+				await message.reply(`Invalid command. Your choices are: ${'`set` `add` `remove`'}`)
 		}
 		
 	},
