@@ -7,7 +7,7 @@ const db = new QuickDB();
 const card_link_db = db.table("card_links");
 const card_url_cache = {}
 module.exports = class GameEmbeds {
-	static async loadCardLinks(theme) {
+	static async loadCardLinks(theme, channel=null) {
 		const card_links = await card_link_db.get(theme) ?? {};
 		for (const link in card_links) {
 			if (!card_links[link]) {
@@ -23,6 +23,9 @@ module.exports = class GameEmbeds {
 			card_url_cache[link] = card_links[link];
 		}
 		await card_link_db.set(theme, card_url_cache);
+		if (channel) {
+			await channel.send(`Cards loaded for \`${theme}\`.`)
+		}
 	}
 	static async getCardImageLink(theme, card) {
 		const card_image_link = `cards/${theme}/${

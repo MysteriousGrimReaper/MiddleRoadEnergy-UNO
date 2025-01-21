@@ -93,8 +93,9 @@ module.exports = {
 			case `load`:
 				const theme_loaded = args[3]
 				if (themes.includes(theme_loaded)) {
-					await GameEmbeds.loadCardLinks(theme_loaded)
-					await message.reply(`Theme \`${theme_loaded}\` loaded.`)
+					await message.reply(`Loading cards from theme \`${theme_loaded}\`...`)
+					await GameEmbeds.loadCardLinks(theme_loaded, message.channel)
+					
 				}
 				else {
 					await message.reply(`Couldn't load the theme (invalid theme). Your choices are: ${'`' + themes.join('` `')+'`'}`)
