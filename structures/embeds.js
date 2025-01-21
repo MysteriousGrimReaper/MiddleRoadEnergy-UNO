@@ -17,7 +17,7 @@ module.exports = class GameEmbeds {
 					});
 					card_url_cache[card_image_link] = response;
 				} catch (err) {
-					console.error(err); // -> error message from server
+					console.log(`If you're seeing this, it likely means at least 1 of the cards when using \`ref theme load\` failed to load. If this messsage only shows up 1-2 times it's probably fine, but if it shows up more, consider running the command again (after you receive confirmation that it has loaded for the first time.)`);
 				}
 			}
 			card_url_cache[link] = card_links[link];
