@@ -221,7 +221,7 @@ async function cacheInitialize() {
 }
 cacheInitialize();
 
-client.login(test ? testToken : token);
+client.login(token);
 
 const yourUserId = "315495597874610178";
 process.on("uncaughtException", async (error) => {
