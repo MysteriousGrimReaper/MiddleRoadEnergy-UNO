@@ -190,7 +190,7 @@ for (const file of commandFiles) {
 				`1273424302858829896`,
 			]
 			if (!message?.member?.permissions.has(
-				PermissionsBitField.Flags.ManageRoles
+				PermissionsBitField.Flags.ViewGuildInsights
 			) && !practice_channel_ids.includes(message.channel.id)) {
 				return
 			}
