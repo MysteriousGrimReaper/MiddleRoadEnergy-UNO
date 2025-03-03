@@ -146,9 +146,7 @@ const uno_message_listener = async (m) => {
 	}
 	}
 	catch (error) { 
-		if (error instanceof ConnectTimeoutError) {
-			message.reply(`The request timed out, please try again.`)
-		}
+		console.error(error)
 	}
 };
 client.on("messageCreate", uno_message_listener);
@@ -207,9 +205,7 @@ for (const file of commandFiles) {
 			}
 		}
 		catch (error) {
-			if (error instanceof ConnectTimeoutError) {
-				message.reply(`The request timed out, please try again.`)
-			}
+			console.error(error)
 		}
 		
 	});
@@ -225,9 +221,6 @@ client.login(token);
 
 const yourUserId = "315495597874610178";
 process.on("uncaughtException", async (error) => {
-	if (error instanceof ConnectTimeoutError) {
-		return; 
-	}
 	console.error(error)
 	await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
 });

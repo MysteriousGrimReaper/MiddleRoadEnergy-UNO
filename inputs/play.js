@@ -1,5 +1,8 @@
 const { QuickDB } = require("quick.db");
 const { display_names, embed_colors } = require("../enums.json");
+const fs = require('fs');
+const path = require('path');
+const { MessageAttachment, AttachmentBuilder } = require('discord.js');
 let { deck } = require("../config.json")
 deck ??= `base`
 const decks = require("../deck.json");
@@ -328,6 +331,19 @@ module.exports = {
 					`## Good game! ${game.players[current_turn].name} has won!`
 				);
 				game.players[current_turn].wins++;
+				// send game json to stats deposit
+				game.log[game.matches_finished].end = Date.now();
+				game.log[game.matches_finished].winner = current_turn;
+				game.matches_finished++;
+				game.powerplay = false;
+				fs.writeFileSync(`${channel.id}.json`, JSON.stringify(game, null, 2));
+				const attachment = new AttachmentBuilder()
+				.setFile(`${channel.id}.json`)
+				.setName(`${channel.id}-game${game.matches_finished}.json`);
+				const stats_channel = (await client.channels.fetch('1345944847248523357')) ??
+				(await client.channels.fetch('1223339597430525972'));
+				await stats_channel.send({ content: `Game ${game.matches_finished}/${game.bestof} finished in <#${channel.id}>:`, files: [attachment] });
+				fs.unlinkSync(`${channel.id}.json`);
 				// reset
 				while (game.players[0].hand.length > 0) {
 					game.deck.push(game.players[0].hand.pop());
@@ -340,10 +356,6 @@ module.exports = {
 				}
 				game.deck = shuffleArray(deck_to_use);
 				game.on = false;
-				game.log[game.matches_finished].end = Date.now();
-				game.log[game.matches_finished].winner = current_turn;
-				game.matches_finished++;
-				game.powerplay = false;
 				chain_update();
 				game.table.current_turn =
 					game.turn_indicator[game.matches_finished];
@@ -387,7 +399,7 @@ module.exports = {
 								: users[1].avatarURL()
 							: users[game.table.current_turn].avatarURL(),
 					});
-
+				
 				await channel.send({ embeds: [stats_embed] });
 				const game_cache = require("../index");
 				game_cache.setGame(channel.id, game);
@@ -444,6 +456,7 @@ module.exports = {
 				game.players[1].currently_running = false
 			}
 			const game_cache = require("../index");
+
 			game_cache.setGame(channel.id, game);
 			return await games.set(`${channel.id}`, game);
 		} else {

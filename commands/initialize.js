@@ -19,6 +19,9 @@ module.exports = {
 	aliases: [`init`, `i`],
 	description: `Initialize a match between two players by pinging them. This should only be run once at the start of a game set.`,
 	async execute(message) {
+		if (deck_to_use == undefined) {
+			return await message.reply(`Invalid deck! Check config.json that the deck is spelt properly.`)
+		}
 		let settings = {
 			max_command_chain: 0,
 			viewers_see_history: true,
@@ -63,7 +66,7 @@ module.exports = {
 				return acc;
 			}, []);
 		}
-
+		
 		if (await games.get(`${channel.id}`)) {
 			await message.reply(
 				`A match has already been set up in this channel! Use \`ref close\` to close it.`
@@ -88,6 +91,7 @@ module.exports = {
 			second_player.user.globalName ??
 			second_player.user.username ??
 			`<@${second_player.id}>`;
+		
 		const game = {
 			on: false,
 			bestof: 7,
