@@ -84,28 +84,30 @@ for (const file of inputFiles) {
 	command_inputs.push({ names, input, execute });
 }
 
-const input_queue = [];
+const input_queue = {};
 let is_processing_commands = false;
 const uno_message_listener = async (m) => {
 	try {
 	if (m.author.bot || !m.content.toLowerCase().startsWith(prefix)) {
 		return;
 	}
-	input_queue.push(m);
-	// console.log(input_queue);
-	if (input_queue.length > 1) {
+	if (!input_queue[m.channel.id]) {
+		input_queue[m.channel.id] = []
+	}
+	input_queue[m.channel.id].push(m);
+	if (input_queue[m.channel.id].length > 1) {
 		return;
 	}
 	is_processing_commands = true;
-	while (input_queue.length > 0) {
-		const message = input_queue[0];
+	while (input_queue[m.channel.id].length > 0) {
+		const message = input_queue[m.channel.id][0];
 		let { content } = message;
 		content = content.toLowerCase();
 		const { channel, guildId } = message;
 		const game =
 			game_cache.getGame(channel.id) ?? (await games.get(channel.id));
 		if (!game) {
-			input_queue.shift();
+			input_queue[m.channel.id].shift();
 			is_processing_commands = false;
 			return await message.reply(
 				`There's no game going on in this channel right now! Wait for a referee to start one.`
@@ -141,7 +143,7 @@ const uno_message_listener = async (m) => {
 				}
 			}
 		}
-		input_queue.shift();
+		input_queue[m.channel.id].shift();
 		is_processing_commands = false;
 	}
 	}
