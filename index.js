@@ -85,7 +85,6 @@ for (const file of inputFiles) {
 }
 
 const input_queue = {};
-let is_processing_commands = false;
 const uno_message_listener = async (m) => {
 	try {
 	if (m.author.bot || !m.content.toLowerCase().startsWith(prefix)) {
@@ -98,7 +97,6 @@ const uno_message_listener = async (m) => {
 	if (input_queue[m.channel.id].length > 1) {
 		return;
 	}
-	is_processing_commands = true;
 	while (input_queue[m.channel.id].length > 0) {
 		const message = input_queue[m.channel.id][0];
 		let { content } = message;
@@ -108,7 +106,6 @@ const uno_message_listener = async (m) => {
 			game_cache.getGame(channel.id) ?? (await games.get(channel.id));
 		if (!game) {
 			input_queue[m.channel.id].shift();
-			is_processing_commands = false;
 			return await message.reply(
 				`There's no game going on in this channel right now! Wait for a referee to start one.`
 			);
@@ -144,7 +141,6 @@ const uno_message_listener = async (m) => {
 			}
 		}
 		input_queue[m.channel.id].shift();
-		is_processing_commands = false;
 	}
 	}
 	catch (error) { 
