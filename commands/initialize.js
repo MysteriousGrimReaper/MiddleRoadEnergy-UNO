@@ -115,7 +115,8 @@ module.exports = {
 					stats,
 					ping: false,
 					has_played_since_last_pp: false,
-					currently_running: false
+					currently_running: false,
+					turns_played: 0
 				},
 				{
 					name: second_name,
@@ -127,7 +128,8 @@ module.exports = {
 					stats,
 					ping: false,
 					has_played_since_last_pp: false,
-					currently_running: false
+					currently_running: false,
+					turns_played: 0
 				},
 			],
 			matches_finished: 0,

@@ -452,6 +452,7 @@ module.exports = {
 				game.players[current_turn].currently_running = true
 			}
 			else {
+				game.players[current_turn].turns_played += 1
 				game.players[0].currently_running = false
 				game.players[1].currently_running = false
 			}

@@ -58,6 +58,9 @@ module.exports = {
 		if (game.powerplay) {
 			return await message.reply(`A power play is already active!`);
 		}
+		if (players[0].turns_played === 0 && players[1].turns_played === 0) {
+			return await message.reply(`Both players must play a card before you can use a power play!`)
+		}
 		players[0].has_played_since_last_pp = false
 		players[1].has_played_since_last_pp = false
 		
