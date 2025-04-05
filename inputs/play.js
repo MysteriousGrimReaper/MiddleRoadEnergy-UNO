@@ -401,6 +401,8 @@ module.exports = {
 					});
 				
 				await channel.send({ embeds: [stats_embed] });
+				game.players[0].turns_played = 0
+				game.players[1].turns_played = 0
 				const game_cache = require("../index");
 				game_cache.setGame(channel.id, game);
 				if (match_is_finished) {
