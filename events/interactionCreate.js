@@ -136,7 +136,6 @@ module.exports = {
 							});
 						} catch (error) {
 							console.error(error)
-							await interaction.channel.send(`<@315495597874610178> ${error}`)
 							return await interaction.editReply({
 								ephemeral: true,
 								content: `An error has occurred!`,
@@ -158,7 +157,6 @@ module.exports = {
 						});
 					} catch (error) {
 						console.error(error)
-						await interaction.channel.send(`<@315495597874610178> ${error}`)
 						return await interaction.editReply({
 							ephemeral: true,
 							content: `An error has occurred!`,
@@ -230,7 +228,7 @@ module.exports = {
 					break;
 			}
 		} catch (error) {
-			await interaction.channel.send(`<@315495597874610178> ${error}`)
+			console.error(error)
 		}
 	},
 };
