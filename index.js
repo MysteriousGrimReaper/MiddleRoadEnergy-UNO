@@ -231,6 +231,6 @@ client.login(token);
 const yourUserId = "315495597874610178";
 process.on("uncaughtException", async (error) => {
 	console.error(error)
-	await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
+	// await (await client.users.fetch("315495597874610178")).send(`<@315495597874610178>\n${error}`)
 });
 
