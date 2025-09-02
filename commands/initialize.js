@@ -14,6 +14,7 @@ function shuffleArray(array) {
 	return array;
 }
 const names = db.table("names");
+
 module.exports = {
 	name: `initialize`,
 	aliases: [`init`, `i`],
@@ -51,8 +52,11 @@ module.exports = {
 		};
 		const no_pp = message.content.includes(`0pp`);
 		const channel = /*message?.mentions?.channels?.first() ?? */message.channel;
-		const first_player = message?.mentions?.members?.at(0);
-		const second_player = message?.mentions?.members?.at(1);
+		const players = message?.mentions?.members;
+		const first_player_index = message?.content?.indexOf(message?.mentions?.members?.at(0));
+		const second_player_index = message?.content?.indexOf(message?.mentions?.members?.at(1));
+		const first_player = first_player_index < second_player_index ? message?.mentions?.members?.at(0) : message?.mentions?.members?.at(1)
+		const second_player = first_player_index < second_player_index ? message?.mentions?.members?.at(1) : message?.mentions?.members?.at(0)
 		function isValidTurnIndicator(turnIndicator) {
 			const pattern = /^(\d+-)*\d+$/;
 			return pattern.test(turnIndicator);
@@ -91,7 +95,6 @@ module.exports = {
 			second_player.user.globalName ??
 			second_player.user.username ??
 			`<@${second_player.id}>`;
-		
 		const game = {
 			on: false,
 			bestof: 7,
